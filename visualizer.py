@@ -116,7 +116,7 @@ def show_summary(sections):
 
 def visualize_schedule(periods, sections, teachers):
     show_schedule_by_period(periods, teachers)
-    # show_schedule_by_classroom(periods, sections)
+    show_schedule_by_classroom(periods, sections)
     show_teacher_utilization(sections)
-    # show_classroom_utilization(periods)
+    show_classroom_utilization(periods)
     show_summary(sections)

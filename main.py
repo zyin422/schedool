@@ -1,7 +1,16 @@
+import sys
+
 import scenarios
 from scheduler import run_scheduler, check
 from visualizer import visualize_schedule
 
+import sys
+from datetime import datetime
+
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+filename = f"visual_{timestamp}.txt"
+
+sys.stdout = open(filename, "w")
 
 def test_scenario(name, scenario_func):
     print(f"\n{'='*60}")
@@ -26,4 +35,4 @@ def test_scenario(name, scenario_func):
         print(f"SCHEDULING CONFLICT: {e}")
 
 
-test_scenario("Balanced Medium School", scenarios.balanced_school_medium)
+test_scenario("Balanced School Medium", scenarios.balanced_school_medium)

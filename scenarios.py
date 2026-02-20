@@ -46,12 +46,10 @@ class Section:
     section_id: str
     class_name: str
     required_classroom_type: str
-    assigned_teacher: Optional[str] = None
-    assigned_classroom: Optional[str] = None
-    #assigned_period: Optional[str] = None
+    assigned_teacher: Optional[Teacher] = None
+    assigned_classroom: Optional[Classroom] = None
     
     def is_fully_assigned(self) -> bool:
-        # check if section has teacher, classroom, and timeslot
         return all([self.assigned_teacher, self.assigned_classroom])
 
 
@@ -553,4 +551,46 @@ def balanced_school_large():
         Period("Period 5"), Period("Period 6"), Period("Period 7"), Period("Period 8")
     ]
     
+    return classroom_types, classrooms, class_list, classes, teachers, periods
+
+def extreme_constrained_school():
+    """
+    EXTREME CASE: The 'Resource Desert'
+    - 2 Periods, 2 Rooms = 4 total slots.
+    - 4 Sections to schedule = 100% utilization required.
+    - Lab-1 is 'Flexible' (Lab + General), but Room-1 is 'General only'.
+    - If the 'General' class (Class C) takes the Lab slot, 
+      the Lab classes (Class A/B) will have nowhere to go.
+    - Teacher T1 is a bottleneck: must teach A or B.
+    """
+
+    classroom_types = ["Lab", "General"]
+
+    classrooms = [
+        # Lab-1 is specialized but can also function as a General classroom
+        Classroom(name="Lab-1", size=30, purposes={"Lab", "General"}),
+        # Room-1 can ONLY do general classes
+        Classroom(name="Room-1", size=25, purposes={"General"}),
+    ]
+
+    class_list = ["A", "B", "C"]
+
+    classes = [
+        Class(name="A", num_sections=2, required_classroom_type="Lab"),
+        Class(name="B", num_sections=1, required_classroom_type="Lab"),
+        Class(name="C", num_sections=1, required_classroom_type="General"),
+    ]
+
+    # Teacher constraints:
+    # We have exactly 4 sections and 4 teacher slots.
+    # If T1 (the only one who knows 'A' and 'B') is used poorly, the schedule fails.
+    teachers = [
+        Teacher(name="T1", subjects={"A", "B"}, max_sections=1, assigned_count=0),
+        Teacher(name="T2", subjects={"A"},       max_sections=1, assigned_count=0),
+        Teacher(name="T3", subjects={"B"},       max_sections=1, assigned_count=0),
+        Teacher(name="T4", subjects={"C"},       max_sections=1, assigned_count=0),
+    ]
+
+    periods = [Period("P1"), Period("P2")]
+
     return classroom_types, classrooms, class_list, classes, teachers, periods
