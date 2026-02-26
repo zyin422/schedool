@@ -1,0 +1,630 @@
+
+============================================================
+TESTING: Balanced School Medium
+============================================================
+Sections: 47, Classrooms: 20, Teachers: 17, Periods: 5
+✅ Phase 2: Sections sorted by difficulty (most constrained first).
+[search] nodes=10,000 section_index=18 elapsed=0.6s
+[search] nodes=20,000 section_index=18 elapsed=1.2s
+[search] nodes=30,000 section_index=18 elapsed=1.8s
+[search] nodes=40,000 section_index=18 elapsed=2.4s
+[search] nodes=50,000 section_index=18 elapsed=3.0s
+[search] nodes=60,000 section_index=18 elapsed=3.6s
+[search] nodes=70,000 section_index=18 elapsed=4.2s
+[search] nodes=80,000 section_index=18 elapsed=4.8s
+[search] nodes=90,000 section_index=18 elapsed=5.5s
+[search] nodes=100,000 section_index=18 elapsed=6.1s
+[search] nodes=110,000 section_index=18 elapsed=6.7s
+[search] nodes=120,000 section_index=18 elapsed=7.3s
+[search] nodes=130,000 section_index=18 elapsed=7.9s
+[search] nodes=140,000 section_index=18 elapsed=8.5s
+[search] nodes=150,000 section_index=18 elapsed=9.2s
+[search] nodes=160,000 section_index=18 elapsed=9.8s
+[search] nodes=170,000 section_index=18 elapsed=10.4s
+[search] nodes=180,000 section_index=18 elapsed=11.0s
+[search] nodes=190,000 section_index=18 elapsed=11.6s
+[search] nodes=200,000 section_index=18 elapsed=12.2s
+[search] nodes=210,000 section_index=18 elapsed=12.8s
+[search] nodes=220,000 section_index=18 elapsed=13.4s
+[search] nodes=230,000 section_index=18 elapsed=14.0s
+[search] nodes=240,000 section_index=18 elapsed=14.6s
+[search] nodes=250,000 section_index=18 elapsed=15.2s
+[search] nodes=260,000 section_index=18 elapsed=15.9s
+[search] nodes=270,000 section_index=17 elapsed=16.5s
+[search] nodes=280,000 section_index=18 elapsed=17.1s
+[search] nodes=290,000 section_index=18 elapsed=17.7s
+[search] nodes=300,000 section_index=18 elapsed=18.3s
+[search] nodes=310,000 section_index=18 elapsed=19.0s
+[search] nodes=320,000 section_index=18 elapsed=19.6s
+[search] nodes=330,000 section_index=18 elapsed=20.2s
+[search] nodes=340,000 section_index=18 elapsed=20.8s
+[search] nodes=350,000 section_index=18 elapsed=21.4s
+[search] nodes=360,000 section_index=18 elapsed=22.0s
+[search] nodes=370,000 section_index=18 elapsed=22.6s
+[search] nodes=380,000 section_index=18 elapsed=23.2s
+[search] nodes=390,000 section_index=18 elapsed=23.8s
+[search] nodes=400,000 section_index=18 elapsed=24.4s
+[search] nodes=410,000 section_index=18 elapsed=25.0s
+[search] nodes=420,000 section_index=18 elapsed=25.6s
+[search] nodes=430,000 section_index=18 elapsed=26.2s
+[search] nodes=440,000 section_index=18 elapsed=26.9s
+[search] nodes=450,000 section_index=18 elapsed=27.5s
+[search] nodes=460,000 section_index=18 elapsed=28.1s
+[search] nodes=470,000 section_index=18 elapsed=28.7s
+[search] nodes=480,000 section_index=18 elapsed=29.3s
+[search] nodes=490,000 section_index=18 elapsed=29.9s
+[search] nodes=500,000 section_index=18 elapsed=30.5s
+[search] nodes=510,000 section_index=18 elapsed=31.1s
+[search] nodes=520,000 section_index=18 elapsed=31.7s
+[search] nodes=530,000 section_index=18 elapsed=32.3s
+[search] nodes=540,000 section_index=18 elapsed=32.9s
+[search] nodes=550,000 section_index=18 elapsed=33.5s
+[search] nodes=560,000 section_index=18 elapsed=34.1s
+[search] nodes=570,000 section_index=18 elapsed=34.7s
+[search] nodes=580,000 section_index=18 elapsed=35.4s
+[search] nodes=590,000 section_index=18 elapsed=36.0s
+[search] nodes=600,000 section_index=18 elapsed=36.6s
+[search] nodes=610,000 section_index=18 elapsed=37.2s
+[search] nodes=620,000 section_index=18 elapsed=37.8s
+[search] nodes=630,000 section_index=18 elapsed=38.4s
+[search] nodes=640,000 section_index=18 elapsed=39.0s
+[search] nodes=650,000 section_index=18 elapsed=39.6s
+[search] nodes=660,000 section_index=18 elapsed=40.2s
+[search] nodes=670,000 section_index=18 elapsed=40.8s
+[search] nodes=680,000 section_index=18 elapsed=41.4s
+[search] nodes=690,000 section_index=18 elapsed=42.0s
+[search] nodes=700,000 section_index=18 elapsed=42.6s
+[search] nodes=710,000 section_index=18 elapsed=43.2s
+[search] nodes=720,000 section_index=18 elapsed=43.9s
+[search] nodes=730,000 section_index=18 elapsed=44.5s
+[search] nodes=740,000 section_index=18 elapsed=45.1s
+[search] nodes=750,000 section_index=18 elapsed=45.7s
+[search] nodes=760,000 section_index=18 elapsed=46.3s
+[search] nodes=770,000 section_index=18 elapsed=46.9s
+[search] nodes=780,000 section_index=18 elapsed=47.5s
+[search] nodes=790,000 section_index=18 elapsed=48.2s
+[search] nodes=800,000 section_index=18 elapsed=48.8s
+[search] nodes=810,000 section_index=18 elapsed=49.4s
+[search] nodes=820,000 section_index=18 elapsed=50.0s
+[search] nodes=830,000 section_index=18 elapsed=50.6s
+[search] nodes=840,000 section_index=18 elapsed=51.2s
+[search] nodes=850,000 section_index=18 elapsed=51.8s
+[search] nodes=860,000 section_index=18 elapsed=52.4s
+[search] nodes=870,000 section_index=18 elapsed=53.0s
+[search] nodes=880,000 section_index=18 elapsed=53.6s
+[search] nodes=890,000 section_index=18 elapsed=54.2s
+[search] nodes=900,000 section_index=18 elapsed=54.8s
+[search] nodes=910,000 section_index=18 elapsed=55.4s
+[search] nodes=920,000 section_index=18 elapsed=56.0s
+[search] nodes=930,000 section_index=18 elapsed=56.6s
+[search] nodes=940,000 section_index=18 elapsed=57.3s
+[search] nodes=950,000 section_index=18 elapsed=57.9s
+[search] nodes=960,000 section_index=18 elapsed=58.5s
+[search] nodes=970,000 section_index=18 elapsed=59.1s
+[search] nodes=980,000 section_index=18 elapsed=59.7s
+[search] nodes=990,000 section_index=18 elapsed=60.3s
+[search] nodes=1,000,000 section_index=18 elapsed=60.9s
+[search] nodes=1,010,000 section_index=18 elapsed=61.5s
+[search] nodes=1,020,000 section_index=18 elapsed=62.1s
+[search] nodes=1,030,000 section_index=18 elapsed=62.7s
+[search] nodes=1,040,000 section_index=18 elapsed=63.3s
+[search] nodes=1,050,000 section_index=18 elapsed=63.9s
+[search] nodes=1,060,000 section_index=18 elapsed=64.5s
+[search] nodes=1,070,000 section_index=18 elapsed=65.1s
+[search] nodes=1,080,000 section_index=18 elapsed=65.8s
+[search] nodes=1,090,000 section_index=18 elapsed=66.4s
+[search] nodes=1,100,000 section_index=18 elapsed=67.0s
+[search] nodes=1,110,000 section_index=18 elapsed=67.6s
+[search] nodes=1,120,000 section_index=18 elapsed=68.2s
+[search] nodes=1,130,000 section_index=18 elapsed=68.8s
+[search] nodes=1,140,000 section_index=18 elapsed=69.4s
+[search] nodes=1,150,000 section_index=18 elapsed=70.0s
+[search] nodes=1,160,000 section_index=18 elapsed=70.6s
+[search] nodes=1,170,000 section_index=18 elapsed=71.2s
+[search] nodes=1,180,000 section_index=18 elapsed=71.8s
+[search] nodes=1,190,000 section_index=18 elapsed=72.4s
+[search] nodes=1,200,000 section_index=18 elapsed=73.1s
+[search] nodes=1,210,000 section_index=18 elapsed=73.7s
+[search] nodes=1,220,000 section_index=18 elapsed=74.3s
+[search] nodes=1,230,000 section_index=18 elapsed=75.0s
+[search] nodes=1,240,000 section_index=18 elapsed=75.6s
+[search] nodes=1,250,000 section_index=18 elapsed=76.2s
+[search] nodes=1,260,000 section_index=18 elapsed=76.8s
+[search] nodes=1,270,000 section_index=18 elapsed=77.4s
+[search] nodes=1,280,000 section_index=18 elapsed=78.1s
+[search] nodes=1,290,000 section_index=18 elapsed=78.7s
+[search] nodes=1,300,000 section_index=17 elapsed=79.2s
+[search] nodes=1,310,000 section_index=18 elapsed=79.8s
+[search] nodes=1,320,000 section_index=18 elapsed=80.4s
+[search] nodes=1,330,000 section_index=18 elapsed=81.0s
+[search] nodes=1,340,000 section_index=18 elapsed=81.6s
+[search] nodes=1,350,000 section_index=18 elapsed=82.2s
+[search] nodes=1,360,000 section_index=18 elapsed=82.8s
+[search] nodes=1,370,000 section_index=18 elapsed=83.5s
+[search] nodes=1,380,000 section_index=18 elapsed=84.1s
+[search] nodes=1,390,000 section_index=18 elapsed=84.7s
+[search] nodes=1,400,000 section_index=18 elapsed=85.3s
+[search] nodes=1,410,000 section_index=18 elapsed=85.9s
+[search] nodes=1,420,000 section_index=18 elapsed=86.5s
+[search] nodes=1,430,000 section_index=18 elapsed=87.1s
+[search] nodes=1,440,000 section_index=18 elapsed=87.7s
+[search] nodes=1,450,000 section_index=18 elapsed=88.3s
+[search] nodes=1,460,000 section_index=18 elapsed=88.9s
+[search] nodes=1,470,000 section_index=18 elapsed=89.5s
+[search] nodes=1,480,000 section_index=18 elapsed=90.1s
+[search] nodes=1,490,000 section_index=18 elapsed=90.7s
+[search] nodes=1,500,000 section_index=18 elapsed=91.3s
+[search] nodes=1,510,000 section_index=18 elapsed=91.9s
+[search] nodes=1,520,000 section_index=18 elapsed=92.5s
+[search] nodes=1,530,000 section_index=18 elapsed=93.1s
+[search] nodes=1,540,000 section_index=18 elapsed=93.7s
+[search] nodes=1,550,000 section_index=18 elapsed=94.4s
+[search] nodes=1,560,000 section_index=17 elapsed=95.0s
+[search] nodes=1,570,000 section_index=18 elapsed=95.6s
+[search] nodes=1,580,000 section_index=18 elapsed=96.2s
+[search] nodes=1,590,000 section_index=18 elapsed=96.8s
+[search] nodes=1,600,000 section_index=18 elapsed=97.4s
+[search] nodes=1,610,000 section_index=18 elapsed=98.0s
+[search] nodes=1,620,000 section_index=18 elapsed=98.6s
+[search] nodes=1,630,000 section_index=18 elapsed=99.2s
+[search] nodes=1,640,000 section_index=18 elapsed=99.8s
+[search] nodes=1,650,000 section_index=18 elapsed=100.4s
+[search] nodes=1,660,000 section_index=18 elapsed=101.0s
+[search] nodes=1,670,000 section_index=18 elapsed=101.6s
+[search] nodes=1,680,000 section_index=18 elapsed=102.2s
+[search] nodes=1,690,000 section_index=18 elapsed=102.8s
+[search] nodes=1,700,000 section_index=18 elapsed=103.4s
+[search] nodes=1,710,000 section_index=18 elapsed=104.0s
+[search] nodes=1,720,000 section_index=18 elapsed=104.6s
+[search] nodes=1,730,000 section_index=18 elapsed=105.2s
+[search] nodes=1,740,000 section_index=18 elapsed=105.8s
+[search] nodes=1,750,000 section_index=18 elapsed=106.5s
+[search] nodes=1,760,000 section_index=18 elapsed=107.1s
+[search] nodes=1,770,000 section_index=18 elapsed=107.7s
+[search] nodes=1,780,000 section_index=18 elapsed=108.3s
+[search] nodes=1,790,000 section_index=18 elapsed=108.9s
+[search] nodes=1,800,000 section_index=18 elapsed=109.5s
+[search] nodes=1,810,000 section_index=18 elapsed=110.1s
+[search] nodes=1,820,000 section_index=18 elapsed=110.7s
+[search] nodes=1,830,000 section_index=18 elapsed=111.3s
+[search] nodes=1,840,000 section_index=18 elapsed=111.9s
+[search] nodes=1,850,000 section_index=18 elapsed=112.5s
+[search] nodes=1,860,000 section_index=18 elapsed=113.1s
+[search] nodes=1,870,000 section_index=18 elapsed=113.7s
+[search] nodes=1,880,000 section_index=18 elapsed=114.3s
+[search] nodes=1,890,000 section_index=18 elapsed=114.9s
+[search] nodes=1,900,000 section_index=18 elapsed=115.5s
+[search] nodes=1,910,000 section_index=18 elapsed=116.1s
+[search] nodes=1,920,000 section_index=18 elapsed=116.7s
+[search] nodes=1,930,000 section_index=18 elapsed=117.3s
+[search] nodes=1,940,000 section_index=18 elapsed=117.9s
+[search] nodes=1,950,000 section_index=18 elapsed=118.5s
+[search] nodes=1,960,000 section_index=18 elapsed=119.1s
+[search] nodes=1,970,000 section_index=18 elapsed=119.7s
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+[search] ABORT: reached time budget (120s)
+❌ CRITICAL: No valid full assignment found by recursive solver!
+⚠️ Restoring deepest partial solution from recursion: 18/47 sections placed.
+⚠️ PARTIAL: Using deepest solution from recursive solver.
+  ✓ Fully assigned: 18/47
+  ✗ Unassigned: 29/47
+✅ Check passed - No scheduling conflicts detected
+
+====================================================================================================
+                                         SCHEDULE BY PERIOD                                         
+====================================================================================================
+
+Period 1
+----------------------------------------------------------------------------------------------------
+  Music-101       │ Band-1               │ Mr. Hall
+  CompLab-101     │ Intro to CS-1        │ Mr. Singh
+  Art-101         │ Art I-1              │ Ms. Rivera
+  Gym-A           │ PE 9-1               │ Coach Davis
+  Lab-101         │ Physics-1            │ Dr. Anderson
+  Lab-102         │ Pre-Calculus-1       │ Ms. Rodriguez
+  Lab-201         │ English 11-1         │ Mr. Smith
+
+Period 2
+----------------------------------------------------------------------------------------------------
+  Music-101       │ Choir-1              │ Mr. Hall
+  CompLab-101     │ AP CompSci A-1       │ Mr. Singh
+  Art-101         │ Art I-2              │ Ms. Rivera
+  Gym-A           │ PE 9-2               │ Coach Davis
+  Lab-101         │ Physics-2            │ Dr. Anderson
+  Lab-102         │ Calculus-1           │ Ms. Rodriguez
+  Lab-201         │ English 11-2         │ Mr. Smith
+
+Period 3
+----------------------------------------------------------------------------------------------------
+  Art-101         │ Art II-1             │ Ms. Rivera
+  Gym-A           │ PE 10-1              │ Coach Davis
+  Lab-101         │ English 12-1         │ Mr. Smith
+
+Period 4
+----------------------------------------------------------------------------------------------------
+  Gym-A           │ PE 10-2              │ Coach Davis
+
+Period 5
+----------------------------------------------------------------------------------------------------
+
+====================================================================================================
+                                       SCHEDULE BY CLASSROOM                                        
+====================================================================================================
+
+Art-101
+----------------------------------------------------------------------------------------------------
+  Period 1     │ Art I-1              │ Ms. Rivera
+  Period 2     │ Art I-2              │ Ms. Rivera
+  Period 3     │ Art II-1             │ Ms. Rivera
+  Period 4     │ [Free]               │
+  Period 5     │ [Free]               │
+
+CompLab-101
+----------------------------------------------------------------------------------------------------
+  Period 1     │ Intro to CS-1        │ Mr. Singh
+  Period 2     │ AP CompSci A-1       │ Mr. Singh
+  Period 3     │ [Free]               │
+  Period 4     │ [Free]               │
+  Period 5     │ [Free]               │
+
+Gym-A
+----------------------------------------------------------------------------------------------------
+  Period 1     │ PE 9-1               │ Coach Davis
+  Period 2     │ PE 9-2               │ Coach Davis
+  Period 3     │ PE 10-1              │ Coach Davis
+  Period 4     │ PE 10-2              │ Coach Davis
+  Period 5     │ [Free]               │
+
+Lab-101
+----------------------------------------------------------------------------------------------------
+  Period 1     │ Physics-1            │ Dr. Anderson
+  Period 2     │ Physics-2            │ Dr. Anderson
+  Period 3     │ English 12-1         │ Mr. Smith
+  Period 4     │ [Free]               │
+  Period 5     │ [Free]               │
+
+Lab-102
+----------------------------------------------------------------------------------------------------
+  Period 1     │ Pre-Calculus-1       │ Ms. Rodriguez
+  Period 2     │ Calculus-1           │ Ms. Rodriguez
+  Period 3     │ [Free]               │
+  Period 4     │ [Free]               │
+  Period 5     │ [Free]               │
+
+Lab-201
+----------------------------------------------------------------------------------------------------
+  Period 1     │ English 11-1         │ Mr. Smith
+  Period 2     │ English 11-2         │ Mr. Smith
+  Period 3     │ [Free]               │
+  Period 4     │ [Free]               │
+  Period 5     │ [Free]               │
+
+Music-101
+----------------------------------------------------------------------------------------------------
+  Period 1     │ Band-1               │ Mr. Hall
+  Period 2     │ Choir-1              │ Mr. Hall
+  Period 3     │ [Free]               │
+  Period 4     │ [Free]               │
+  Period 5     │ [Free]               │
+
+====================================================================================================
+TEACHER UTILIZATION
+----------------------------------------------------------------------------------------------------
+  Coach Davis          ████████░░ 4/5 (80%) | Health, PE 10, PE 9
+  Dr. Anderson         ██████░░░░ 2/3 (67%) | Physics
+  Mr. Hall             ██████████ 2/2 (100%) | Band, Choir
+  Mr. Singh            ██████████ 2/2 (100%) | AP CompSci A, Intro to CS
+  Mr. Smith            ██████████ 3/3 (100%) | English 11, English 12
+  Ms. Rivera           ██████████ 3/3 (100%) | Art I, Art II
+  Ms. Rodriguez        ██████░░░░ 2/3 (67%) | Algebra II, Calculus, Pre-Calculus
+
+====================================================================================================
+CLASSROOM UTILIZATION
+----------------------------------------------------------------------------------------------------
+  Gym-A                ████░ 4/5
+  Art-101              ███░░ 3/5
+  Lab-101              ███░░ 3/5
+  Music-101            ██░░░ 2/5
+  CompLab-101          ██░░░ 2/5
+  Lab-102              ██░░░ 2/5
+  Lab-201              ██░░░ 2/5
+
+====================================================================================================
+SUMMARY
+----------------------------------------------------------------------------------------------------
+  ✓ Fully assigned: 18/47
+  ✗ Unassigned: 29/47
+
+⚠️  UNASSIGNED SECTIONS:
+----------------------------------------------------------------------------------------------------
+  - English 12-2         needs: teacher, classroom
+  - World History-1      needs: teacher, classroom
+  - World History-2      needs: teacher, classroom
+  - US History-1         needs: teacher, classroom
+  - US History-2         needs: teacher, classroom
+  - Government-1         needs: teacher, classroom
+  - Government-2         needs: teacher, classroom
+  - Economics-1          needs: teacher, classroom
+  - Spanish I-1          needs: teacher, classroom
+  - Spanish I-2          needs: teacher, classroom
+  - Spanish II-1         needs: teacher, classroom
+  - French I-1           needs: teacher, classroom
+  - Health-1             needs: teacher, classroom
+  - Drama-1              needs: teacher, classroom
+  - Business-1           needs: teacher, classroom
+  - Biology-1            needs: teacher, classroom
+  - Biology-2            needs: teacher, classroom
+  - Chemistry-1          needs: teacher, classroom
+  - Chemistry-2          needs: teacher, classroom
+  - Algebra I-1          needs: teacher, classroom
+  - Algebra I-2          needs: teacher, classroom
+  - Algebra II-1         needs: teacher, classroom
+  - Algebra II-2         needs: teacher, classroom
+  - Geometry-1           needs: teacher, classroom
+  - Geometry-2           needs: teacher, classroom
+  - English 9-1          needs: teacher, classroom
+  - English 9-2          needs: teacher, classroom
+  - English 10-1         needs: teacher, classroom
+  - English 10-2         needs: teacher, classroom
+✅ Check passed - No scheduling conflicts detected

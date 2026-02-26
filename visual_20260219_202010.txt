@@ -1,0 +1,232 @@
+
+============================================================
+TESTING: Balanced School Medium
+============================================================
+Sections: 47, Classrooms: 20, Teachers: 17, Periods: 5
+✅ Phase 2: Sections sorted by difficulty (most constrained first).
+❌ CRITICAL: No valid full assignment found by recursive solver!
+⚠️ Falling back to greedy pipeline to produce a partial schedule for inspection.
+⚠️ Unassigned after swap attempts: English 11-1 in period Period 5
+⚠️ Unassigned after swap attempts: Health-1 in period Period 5
+⚠️ PARTIAL: Some sections remain unassigned after fallback.
+  ✓ Fully assigned: 45/47
+  ✗ Unassigned: 2/47
+✅ Check passed - No scheduling conflicts detected
+
+====================================================================================================
+                                         SCHEDULE BY PERIOD                                         
+====================================================================================================
+
+Period 1
+----------------------------------------------------------------------------------------------------
+  Lab-101         │ Biology-1            │ Dr. Wilson
+  Lab-102         │ Physics-2            │ Dr. Anderson
+  Art-101         │ Art I-1              │ Ms. Rivera
+  CompLab-101     │ Intro to CS-1        │ Mr. Singh
+  Lab-201         │ English 11-2         │ Mr. Smith
+  Lab-202         │ US History-1         │ Mr. Adams
+  Room-101        │ Spanish I-1          │ Sra. Hernandez
+  Room-102        │ Drama-1              │ Ms. Taylor
+  Room-103        │ Algebra II-2         │ Ms. Davis
+  Room-201        │ English 10-1         │ Ms. Johnson
+
+Period 2
+----------------------------------------------------------------------------------------------------
+  Lab-101         │ Biology-2            │ Dr. Wilson
+  Gym-A           │ PE 9-1               │ Coach Davis
+  Art-101         │ Art I-2              │ Ms. Rivera
+  CompLab-101     │ AP CompSci A-1       │ Mr. Singh
+  Lab-102         │ English 12-1         │ Mr. Smith
+  Lab-201         │ US History-2         │ Mr. Adams
+  Lab-202         │ Spanish I-2          │ Sra. Hernandez
+  Room-101        │ Business-1           │ Ms. Clark
+  Room-102        │ Geometry-1           │ Ms. Davis
+  Room-103        │ English 10-2         │ Ms. Johnson
+
+Period 3
+----------------------------------------------------------------------------------------------------
+  Lab-101         │ Chemistry-1          │ Dr. Martinez
+  Gym-A           │ PE 9-2               │ Coach Davis
+  Art-101         │ Art II-1             │ Ms. Rivera
+  Lab-102         │ Pre-Calculus-1       │ Ms. Rodriguez
+  Lab-201         │ English 12-2         │ Mr. Smith
+  Lab-202         │ Government-1         │ Ms. Clark
+  CompLab-101     │ Spanish II-1         │ Sra. Hernandez
+  Room-101        │ Algebra I-1          │ Ms. Davis
+  Room-102        │ Geometry-2           │ Mr. Lee
+
+Period 4
+----------------------------------------------------------------------------------------------------
+  Lab-101         │ Chemistry-2          │ Dr. Martinez
+  Gym-A           │ PE 10-1              │ Coach Davis
+  Music-101       │ Band-1               │ Mr. Hall
+  Lab-102         │ Calculus-1           │ Ms. Rodriguez
+  Lab-201         │ World History-1      │ Mr. Adams
+  Lab-202         │ Government-2         │ Ms. Clark
+  CompLab-101     │ French I-1           │ Sra. Hernandez
+  Room-101        │ Algebra I-2          │ Ms. Davis
+  Room-102        │ English 9-1          │ Ms. Johnson
+
+Period 5
+----------------------------------------------------------------------------------------------------
+  Lab-101         │ Physics-1            │ Dr. Anderson
+  Gym-A           │ PE 10-2              │ Coach Davis
+  Music-101       │ Choir-1              │ Mr. Hall
+  Lab-102         │ English 11-1         │ ⚠️ NO TEACHER
+      ↳ 1 qualified teacher(s):
+         - Mr. Smith: teaching 0/3 sections
+  Lab-201         │ World History-2      │ Mr. Adams
+  Lab-202         │ Economics-1          │ Ms. Clark
+  CompLab-101     │ Health-1             │ ⚠️ NO TEACHER
+      ↳ 1 qualified teacher(s):
+         - Coach Davis: teaching 0/5 sections
+  Room-101        │ Algebra II-1         │ Ms. Rodriguez
+  Room-102        │ English 9-2          │ Ms. Taylor
+
+====================================================================================================
+                                       SCHEDULE BY CLASSROOM                                        
+====================================================================================================
+
+Art-101
+----------------------------------------------------------------------------------------------------
+  Period 1     │ Art I-1              │ Ms. Rivera
+  Period 2     │ Art I-2              │ Ms. Rivera
+  Period 3     │ Art II-1             │ Ms. Rivera
+  Period 4     │ [Free]               │
+  Period 5     │ [Free]               │
+
+CompLab-101
+----------------------------------------------------------------------------------------------------
+  Period 1     │ Intro to CS-1        │ Mr. Singh
+  Period 2     │ AP CompSci A-1       │ Mr. Singh
+  Period 3     │ Spanish II-1         │ Sra. Hernandez
+  Period 4     │ French I-1           │ Sra. Hernandez
+  Period 5     │ Health-1             │ ⚠️ NO TEACHER
+
+Gym-A
+----------------------------------------------------------------------------------------------------
+  Period 1     │ [Free]               │
+  Period 2     │ PE 9-1               │ Coach Davis
+  Period 3     │ PE 9-2               │ Coach Davis
+  Period 4     │ PE 10-1              │ Coach Davis
+  Period 5     │ PE 10-2              │ Coach Davis
+
+Lab-101
+----------------------------------------------------------------------------------------------------
+  Period 1     │ Biology-1            │ Dr. Wilson
+  Period 2     │ Biology-2            │ Dr. Wilson
+  Period 3     │ Chemistry-1          │ Dr. Martinez
+  Period 4     │ Chemistry-2          │ Dr. Martinez
+  Period 5     │ Physics-1            │ Dr. Anderson
+
+Lab-102
+----------------------------------------------------------------------------------------------------
+  Period 1     │ Physics-2            │ Dr. Anderson
+  Period 2     │ English 12-1         │ Mr. Smith
+  Period 3     │ Pre-Calculus-1       │ Ms. Rodriguez
+  Period 4     │ Calculus-1           │ Ms. Rodriguez
+  Period 5     │ English 11-1         │ ⚠️ NO TEACHER
+
+Lab-201
+----------------------------------------------------------------------------------------------------
+  Period 1     │ English 11-2         │ Mr. Smith
+  Period 2     │ US History-2         │ Mr. Adams
+  Period 3     │ English 12-2         │ Mr. Smith
+  Period 4     │ World History-1      │ Mr. Adams
+  Period 5     │ World History-2      │ Mr. Adams
+
+Lab-202
+----------------------------------------------------------------------------------------------------
+  Period 1     │ US History-1         │ Mr. Adams
+  Period 2     │ Spanish I-2          │ Sra. Hernandez
+  Period 3     │ Government-1         │ Ms. Clark
+  Period 4     │ Government-2         │ Ms. Clark
+  Period 5     │ Economics-1          │ Ms. Clark
+
+Music-101
+----------------------------------------------------------------------------------------------------
+  Period 1     │ [Free]               │
+  Period 2     │ [Free]               │
+  Period 3     │ [Free]               │
+  Period 4     │ Band-1               │ Mr. Hall
+  Period 5     │ Choir-1              │ Mr. Hall
+
+Room-101
+----------------------------------------------------------------------------------------------------
+  Period 1     │ Spanish I-1          │ Sra. Hernandez
+  Period 2     │ Business-1           │ Ms. Clark
+  Period 3     │ Algebra I-1          │ Ms. Davis
+  Period 4     │ Algebra I-2          │ Ms. Davis
+  Period 5     │ Algebra II-1         │ Ms. Rodriguez
+
+Room-102
+----------------------------------------------------------------------------------------------------
+  Period 1     │ Drama-1              │ Ms. Taylor
+  Period 2     │ Geometry-1           │ Ms. Davis
+  Period 3     │ Geometry-2           │ Mr. Lee
+  Period 4     │ English 9-1          │ Ms. Johnson
+  Period 5     │ English 9-2          │ Ms. Taylor
+
+Room-103
+----------------------------------------------------------------------------------------------------
+  Period 1     │ Algebra II-2         │ Ms. Davis
+  Period 2     │ English 10-2         │ Ms. Johnson
+  Period 3     │ [Free]               │
+  Period 4     │ [Free]               │
+  Period 5     │ [Free]               │
+
+Room-201
+----------------------------------------------------------------------------------------------------
+  Period 1     │ English 10-1         │ Ms. Johnson
+  Period 2     │ [Free]               │
+  Period 3     │ [Free]               │
+  Period 4     │ [Free]               │
+  Period 5     │ [Free]               │
+
+====================================================================================================
+TEACHER UTILIZATION
+----------------------------------------------------------------------------------------------------
+  Coach Davis          ████████░░ 4/5 (80%) | Health, PE 10, PE 9
+  Dr. Anderson         ██████░░░░ 2/3 (67%) | Physics
+  Dr. Martinez         ██████░░░░ 2/3 (67%) | Chemistry
+  Dr. Wilson           ██████░░░░ 2/3 (67%) | Biology
+  Mr. Adams            ██████████ 4/4 (100%) | US History, World History
+  Mr. Hall             ██████████ 2/2 (100%) | Band, Choir
+  Mr. Lee              ███░░░░░░░ 1/3 (33%) | Algebra I, Geometry
+  Mr. Singh            ██████████ 2/2 (100%) | AP CompSci A, Intro to CS
+  Mr. Smith            ██████████ 3/3 (100%) | English 11, English 12
+  Ms. Clark            ██████████ 4/4 (100%) | Business, Economics, Government
+  Ms. Davis            ██████████ 4/4 (100%) | Algebra I, Algebra II, Geometry
+  Ms. Johnson          ██████████ 3/3 (100%) | English 10, English 9
+  Ms. Rivera           ██████████ 3/3 (100%) | Art I, Art II
+  Ms. Rodriguez        ██████████ 3/3 (100%) | Algebra II, Calculus, Pre-Calculus
+  Ms. Taylor           ██████░░░░ 2/3 (67%) | Drama, English 10, English 9
+  Sra. Hernandez       ██████████ 4/4 (100%) | French I, Spanish I, Spanish II
+
+====================================================================================================
+CLASSROOM UTILIZATION
+----------------------------------------------------------------------------------------------------
+  Lab-101              █████ 5/5
+  Lab-102              █████ 5/5
+  CompLab-101          █████ 5/5
+  Lab-201              █████ 5/5
+  Lab-202              █████ 5/5
+  Room-101             █████ 5/5
+  Room-102             █████ 5/5
+  Gym-A                ████░ 4/5
+  Art-101              ███░░ 3/5
+  Room-103             ██░░░ 2/5
+  Music-101            ██░░░ 2/5
+  Room-201             █░░░░ 1/5
+
+====================================================================================================
+SUMMARY
+----------------------------------------------------------------------------------------------------
+  ✓ Fully assigned: 45/47
+  ✗ Unassigned: 2/47
+
+⚠️  UNASSIGNED SECTIONS:
+----------------------------------------------------------------------------------------------------
+  - English 11-1         needs: teacher
+  - Health-1             needs: teacher
+✅ Check passed - No scheduling conflicts detected

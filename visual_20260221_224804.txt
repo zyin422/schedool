@@ -1,0 +1,8 @@
+
+============================================================
+TESTING: Balanced School Medium
+============================================================
+Sections: 47, Classrooms: 20, Teachers: 17, Periods: 5
+✅ Phase 2: Sections sorted by difficulty (most constrained first).
+[search] NEW BEST: 36 sections assigned at section_index=36
+[search] nodes=10,000 section_index=46 assigned=45 elapsed=11.4s

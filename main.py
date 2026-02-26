@@ -3,8 +3,6 @@ import sys
 import scenarios
 from scheduler import run_scheduler, check
 from visualizer import visualize_schedule
-
-import sys
 from datetime import datetime
 
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

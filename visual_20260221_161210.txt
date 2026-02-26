@@ -1,0 +1,110 @@
+
+============================================================
+TESTING: Balanced School Medium
+============================================================
+Sections: 47, Classrooms: 20, Teachers: 17, Periods: 5
+✅ Phase 2: Sections sorted by difficulty (most constrained first).
+[DEBUG forward_check] section_index=0, period=Period 1, room=Music-101, teacher=Mr. Hall
+[DEBUG forward_check] FAIL: English 11-1 - sole teacher Mr. Smith needs 4 capacity but only has 3
+[DEBUG forward_check] section_index=0, period=Period 2, room=Music-101, teacher=Mr. Hall
+[DEBUG forward_check] FAIL: English 11-1 - sole teacher Mr. Smith needs 4 capacity but only has 3
+[DEBUG forward_check] section_index=0, period=Period 3, room=Music-101, teacher=Mr. Hall
+[DEBUG forward_check] FAIL: English 11-1 - sole teacher Mr. Smith needs 4 capacity but only has 3
+[DEBUG forward_check] section_index=0, period=Period 4, room=Music-101, teacher=Mr. Hall
+[DEBUG forward_check] FAIL: English 11-1 - sole teacher Mr. Smith needs 4 capacity but only has 3
+[DEBUG forward_check] section_index=0, period=Period 5, room=Music-101, teacher=Mr. Hall
+[DEBUG forward_check] FAIL: English 11-1 - sole teacher Mr. Smith needs 4 capacity but only has 3
+❌ CRITICAL: No valid full assignment found by recursive solver!
+⚠️ Restoring deepest partial solution from recursion: 0/47 sections placed.
+⚠️ PARTIAL: Using deepest solution from recursive solver.
+  ✓ Fully assigned: 0/47
+  ✗ Unassigned: 47/47
+✅ Check passed - No scheduling conflicts detected
+
+====================================================================================================
+                                         SCHEDULE BY PERIOD                                         
+====================================================================================================
+
+Period 1
+----------------------------------------------------------------------------------------------------
+
+Period 2
+----------------------------------------------------------------------------------------------------
+
+Period 3
+----------------------------------------------------------------------------------------------------
+
+Period 4
+----------------------------------------------------------------------------------------------------
+
+Period 5
+----------------------------------------------------------------------------------------------------
+
+====================================================================================================
+                                       SCHEDULE BY CLASSROOM                                        
+====================================================================================================
+
+====================================================================================================
+TEACHER UTILIZATION
+----------------------------------------------------------------------------------------------------
+
+====================================================================================================
+CLASSROOM UTILIZATION
+----------------------------------------------------------------------------------------------------
+
+====================================================================================================
+SUMMARY
+----------------------------------------------------------------------------------------------------
+  ✓ Fully assigned: 0/47
+  ✗ Unassigned: 47/47
+
+⚠️  UNASSIGNED SECTIONS:
+----------------------------------------------------------------------------------------------------
+  - Band-1               needs: teacher, classroom
+  - Choir-1              needs: teacher, classroom
+  - Intro to CS-1        needs: teacher, classroom
+  - AP CompSci A-1       needs: teacher, classroom
+  - Art I-1              needs: teacher, classroom
+  - Art I-2              needs: teacher, classroom
+  - Art II-1             needs: teacher, classroom
+  - PE 9-1               needs: teacher, classroom
+  - PE 9-2               needs: teacher, classroom
+  - PE 10-1              needs: teacher, classroom
+  - PE 10-2              needs: teacher, classroom
+  - Physics-1            needs: teacher, classroom
+  - Physics-2            needs: teacher, classroom
+  - Pre-Calculus-1       needs: teacher, classroom
+  - Calculus-1           needs: teacher, classroom
+  - English 11-1         needs: teacher, classroom
+  - English 11-2         needs: teacher, classroom
+  - English 12-1         needs: teacher, classroom
+  - English 12-2         needs: teacher, classroom
+  - World History-1      needs: teacher, classroom
+  - World History-2      needs: teacher, classroom
+  - US History-1         needs: teacher, classroom
+  - US History-2         needs: teacher, classroom
+  - Government-1         needs: teacher, classroom
+  - Government-2         needs: teacher, classroom
+  - Economics-1          needs: teacher, classroom
+  - Spanish I-1          needs: teacher, classroom
+  - Spanish I-2          needs: teacher, classroom
+  - Spanish II-1         needs: teacher, classroom
+  - French I-1           needs: teacher, classroom
+  - Health-1             needs: teacher, classroom
+  - Drama-1              needs: teacher, classroom
+  - Business-1           needs: teacher, classroom
+  - Biology-1            needs: teacher, classroom
+  - Biology-2            needs: teacher, classroom
+  - Chemistry-1          needs: teacher, classroom
+  - Chemistry-2          needs: teacher, classroom
+  - Algebra I-1          needs: teacher, classroom
+  - Algebra I-2          needs: teacher, classroom
+  - Algebra II-1         needs: teacher, classroom
+  - Algebra II-2         needs: teacher, classroom
+  - Geometry-1           needs: teacher, classroom
+  - Geometry-2           needs: teacher, classroom
+  - English 9-1          needs: teacher, classroom
+  - English 9-2          needs: teacher, classroom
+  - English 10-1         needs: teacher, classroom
+  - English 10-2         needs: teacher, classroom
+✅ Check passed - No scheduling conflicts detected

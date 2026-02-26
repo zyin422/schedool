@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List, Set, Optional, Dict
+import time
 
 
 @dataclass
@@ -69,9 +70,23 @@ class SchedulingContext:
     valid_rooms: Dict[str, List[Classroom]] = field(default_factory=dict)
 
     # Mutable state (scoreboard)
-    teacher_schedule: Dict[str, Dict[str, Optional[Section]]] = field(default_factory=dict)
-    room_schedule: Dict[str, Dict[str, Optional[Section]]] = field(default_factory=dict)
+    teacher_schedule: Dict[str, Dict[str, Optional[Section]]] = field(default_factory=dict) # [teacher_name][period_id] = assigned Section or None
+    room_schedule: Dict[str, Dict[str, Optional[Section]]] = field(default_factory=dict) # [room_name][period_id] = assigned Section or None
     teacher_load: Dict[str, int] = field(default_factory=dict)
+
+    # --- instrumentation for recursion/search ---
+    search_nodes: int = 0                # number of search nodes visited
+    search_start_time: float = 0.0      # time.time() when search started
+    search_last_report: int = 0         # last node count we reported at
+    search_max_nodes: int = 10_000_000   # bail-out node budget (tune as needed)
+    search_max_seconds: int = 120        # bail-out time budget (seconds)
+
+    # --- tracking best partial solution ---
+    best_section_index: int = -1         # deepest section index reached (-1 = not initialized)
+    best_teacher_schedule: Dict[str, Dict[str, Optional[Section]]] = field(default_factory=dict)
+    best_room_schedule: Dict[str, Dict[str, Optional[Section]]] = field(default_factory=dict)
+    best_teacher_load: Dict[str, int] = field(default_factory=dict)
+    best_period_assignments: Dict[str, List[Section]] = field(default_factory=dict)
 
 
 def generate_sections(classes):
@@ -119,6 +134,11 @@ def build_scheduling_context(sections, teachers, classrooms, periods) -> Schedul
 
     for r in classrooms:
         ctx.room_schedule[r.name] = {p.period_id: None for p in periods}
+
+    # instrumentation start time
+    ctx.search_start_time = time.time()
+    ctx.search_nodes = 0
+    ctx.search_last_report = 0
 
     return ctx
 
@@ -237,58 +257,168 @@ def assign_teachers_to_sections(ctx: SchedulingContext):
                 print(f"⚠️ Unassigned after swap attempts: {section.section_id} in period {p.period_id}")
 
 
-def solve_recursive(ctx: SchedulingContext, section_index: int = 0) -> bool:
+def forward_check(ctx: SchedulingContext, section_index: int, period_id: str, room, teacher) -> bool:
     """
-    Phase 3: Recursive backtracking solver over ctx.all_sections (already prioritized).
-    This assigns teachers only (rooms are assumed assigned and recorded in ctx.room_schedule).
-    Returns True if a full assignment is found, False if unsolvable with current domains.
+    Forward Checking: After making an assignment (period, room, teacher), 
+    quickly peek ahead at unassigned sections to see if they still have 
+    viable options remaining.
+    
+    Returns True if all remaining sections still have at least one valid option.
+    Returns False if any section's domain is now empty (causing immediate backtrack).
+    
+    This is a more sophisticated check that considers:
+    1. For each unassigned section, counts available rooms across ALL periods
+    2. For each unassigned section, counts available teachers across ALL periods  
+    3. Special handling for single-teacher subjects: ensures enough capacity remains
     """
-    # BASE CASE: all sections processed
-    if section_index >= len(ctx.all_sections):
-        return True
-
-    section = ctx.all_sections[section_index]
-    # locate the period this section was assigned to
-    period = next((p for p in ctx.periods if section in p.assigned_sections), None)
-    if period is None:
-        # section has no period assigned -> cannot proceed
-        return False
-    p_id = period.period_id
-
-    # Try every valid teacher for this section (order from precomputed domain)
-    for teacher in ctx.valid_teachers.get(section.section_id, []):
-        # teacher must be free in this period and below max load
-        if ctx.teacher_schedule[teacher.name][p_id] is None and ctx.teacher_load[teacher.name] < teacher.max_sections:
-            # Choose
-            section.assigned_teacher = teacher
-            ctx.teacher_schedule[teacher.name][p_id] = section
-            ctx.teacher_load[teacher.name] += 1
-
-            # Recurse
-            if solve_recursive(ctx, section_index + 1):
-                return True
-
-            # Backtrack
-            section.assigned_teacher = None
-            ctx.teacher_schedule[teacher.name][p_id] = None
-            ctx.teacher_load[teacher.name] -= 1
-
-    # No teacher led to a solution for this section -> fail
-    return False
+    # For each unassigned section, check if it still has viable options
+    for i in range(section_index + 1, len(ctx.all_sections)):
+        future_section = ctx.all_sections[i]
+        
+        # Count available (period, room) pairs for this section
+        available_room_periods = 0
+        for p in ctx.periods:
+            p_id = p.period_id
+            for room_opt in ctx.valid_rooms.get(future_section.section_id, []):
+                if ctx.room_schedule[room_opt.name][p_id] is None:
+                    available_room_periods += 1
+        
+        if available_room_periods == 0:
+            # No room available for this section in any period
+            return False
+        
+        # Count available teachers for this section across all periods
+        # A teacher is available if they're free in at least one period AND have capacity
+        available_teachers = []
+        for teacher_opt in ctx.valid_teachers.get(future_section.section_id, []):
+            # Check if teacher has any free period
+            for p in ctx.periods:
+                p_id = p.period_id
+                if ctx.teacher_schedule[teacher_opt.name][p_id] is None and ctx.teacher_load[teacher_opt.name] < teacher_opt.max_sections:
+                    available_teachers.append(teacher_opt)
+                    break  # Teacher has at least one slot
+        
+        if len(available_teachers) == 0:
+            # No teacher available for this section in any period
+            return False
+        
+        # SPECIAL CHECK: If only ONE teacher is available for this section,
+        # verify they have enough remaining capacity for ALL remaining sections 
+        # that ONLY this teacher can teach
+        if len(available_teachers) == 1:
+            sole_teacher = available_teachers[0]
+            # Count how many remaining sections (from this point forward) 
+            # are ONLY teachable by this teacher
+            sole_teacher_sections = 0
+            for j in range(i, len(ctx.all_sections)):
+                other_section = ctx.all_sections[j]
+                if other_section.section_id == future_section.section_id:
+                    continue
+                # Check if this other section also only has this one teacher
+                other_teachers = ctx.valid_teachers.get(other_section.section_id, [])
+                if len(other_teachers) == 1 and other_teachers[0].name == sole_teacher.name:
+                    sole_teacher_sections += 1
+            
+            # Calculate remaining capacity for this teacher
+            remaining_capacity = sole_teacher.max_sections - ctx.teacher_load[sole_teacher.name]
+            # We need capacity for: current section + all other sole-teacher sections
+            needed_capacity = 1 + sole_teacher_sections
+            if remaining_capacity < needed_capacity:
+                # Not enough capacity - will cause dead end later
+                return False
+    
+    return True
 
 
 def solve_recursive_full(ctx: SchedulingContext, section_index: int = 0) -> bool:
     """
     Phase 3 (full): Recursive backtracking over Period x Room x Teacher choices.
-    Places each section into a (period, room, teacher) triple or backtracks.
+    Places each section into a (period, room, teacher) triple or skips it.
+    Instrumented to report progress and support early bail-out.
+    
+    Key improvement: When a section cannot be placed, SKIP it and continue
+    to the next section rather than backtracking endlessly. This allows
+    the solver to find partial solutions even when constraints are impossible.
+    
+    Tracks the deepest partial solution for use when no full solution is found.
     """
-    # BASE CASE: all sections placed
+    # Helper to count how many sections are currently assigned
+    def count_assigned():
+        count = 0
+        for s in ctx.all_sections:
+            if s.assigned_teacher and s.assigned_classroom:
+                count += 1
+        return count
+
+    # Initialize best solution tracking on first call
+    if ctx.best_section_index == -1 and section_index == 0:
+        # Initialize best_teacher_schedule with proper structure
+        for t in ctx.teachers:
+            ctx.best_teacher_schedule[t.name] = {p.period_id: None for p in ctx.periods}
+        ctx.best_teacher_load = {t.name: 0 for t in ctx.teachers}
+        for r in ctx.classrooms:
+            ctx.best_room_schedule[r.name] = {p.period_id: None for p in ctx.periods}
+        for p in ctx.periods:
+            ctx.best_period_assignments[p.period_id] = []
+
+    # BASE CASE: all sections processed
     if section_index >= len(ctx.all_sections):
-        return True
+        # Check if ALL sections are actually assigned (not just reached end)
+        current_assigned = count_assigned()
+        if current_assigned == len(ctx.all_sections):
+            # This is a truly full solution - save it
+            ctx.best_section_index = len(ctx.all_sections)
+            for t in ctx.teachers:
+                ctx.best_teacher_schedule[t.name] = dict(ctx.teacher_schedule[t.name])
+            ctx.best_teacher_load = dict(ctx.teacher_load)
+            for r in ctx.classrooms:
+                ctx.best_room_schedule[r.name] = dict(ctx.room_schedule[r.name])
+            for p in ctx.periods:
+                ctx.best_period_assignments[p.period_id] = list(p.assigned_sections)
+            return True
+        else:
+            # Reached end but some sections were skipped - not a full solution
+            # Save as best partial if better
+            if current_assigned > ctx.best_section_index:
+                ctx.best_section_index = current_assigned
+                for t in ctx.teachers:
+                    ctx.best_teacher_schedule[t.name] = dict(ctx.teacher_schedule[t.name])
+                ctx.best_teacher_load = dict(ctx.teacher_load)
+                for r in ctx.classrooms:
+                    ctx.best_room_schedule[r.name] = dict(ctx.room_schedule[r.name])
+                for p in ctx.periods:
+                    ctx.best_period_assignments[p.period_id] = list(p.assigned_sections)
+            return False
+
+    # instrumentation: count node
+    ctx.search_nodes += 1
+
+    # periodic progress report
+    if ctx.search_nodes - ctx.search_last_report >= 10000:
+        elapsed = time.time() - ctx.search_start_time
+        current_assigned = count_assigned()
+        print(f"[search] nodes={ctx.search_nodes:,} section_index={section_index} assigned={current_assigned} elapsed={elapsed:.1f}s")
+        ctx.search_last_report = ctx.search_nodes
+
+    # bail-out conditions
+    if ctx.search_nodes >= ctx.search_max_nodes:
+        print(f"[search] ABORT: reached node budget ({ctx.search_nodes} >= {ctx.search_max_nodes})")
+        return False
+    if (time.time() - ctx.search_start_time) >= ctx.search_max_seconds:
+        print(f"[search] ABORT: reached time budget ({ctx.search_max_seconds}s)")
+        return False
 
     section = ctx.all_sections[section_index]
 
+    # ensure this section is not already sitting in any period (prevent duplicates)
+    for p_clean in ctx.periods:
+        if section in p_clean.assigned_sections:
+            p_clean.assigned_sections.remove(section)
+    section.assigned_teacher = None
+    section.assigned_classroom = None
+
     # Try every period (time)
+    section_placed = False
     for period in ctx.periods:
         p_id = period.period_id
 
@@ -309,11 +439,16 @@ def solve_recursive_full(ctx: SchedulingContext, section_index: int = 0) -> bool
                 # --- CHOOSE ---
                 section.assigned_classroom = room
                 section.assigned_teacher = teacher
-                period.assigned_sections.append(section)
+
+                # place the section in this period (ensure no duplicate)
+                if section not in period.assigned_sections:
+                    period.assigned_sections.append(section)
 
                 ctx.room_schedule[room.name][p_id] = section
                 ctx.teacher_schedule[teacher.name][p_id] = section
                 ctx.teacher_load[teacher.name] += 1
+
+                section_placed = True
 
                 # --- RECURSE ---
                 if solve_recursive_full(ctx, section_index + 1):
@@ -331,8 +466,31 @@ def solve_recursive_full(ctx: SchedulingContext, section_index: int = 0) -> bool
                     pass
                 section.assigned_teacher = None
                 section.assigned_classroom = None
+                section_placed = False
 
-    # No valid placement found for this section
+    # KEY FIX: After trying ALL options for this section, decide what to do
+    # Count how many sections are currently assigned
+    current_assigned = count_assigned()
+    
+    # Save as best if we have more assigned sections than previous best
+    # This is better than just tracking depth - we track actual progress
+    if current_assigned > ctx.best_section_index:
+        ctx.best_section_index = current_assigned
+        for t in ctx.teachers:
+            ctx.best_teacher_schedule[t.name] = dict(ctx.teacher_schedule[t.name])
+        ctx.best_teacher_load = dict(ctx.teacher_load)
+        for r in ctx.classrooms:
+            ctx.best_room_schedule[r.name] = dict(ctx.room_schedule[r.name])
+        for p in ctx.periods:
+            ctx.best_period_assignments[p.period_id] = list(p.assigned_sections)
+        print(f"[search] NEW BEST: {current_assigned} sections assigned at section_index={section_index}")
+
+    # If we couldn't place this section, SKIP it and continue to next
+    # This is the key difference - we don't get stuck in permutations
+    if not section_placed:
+        # Just continue to next section without this one
+        return solve_recursive_full(ctx, section_index + 1)
+
     return False
 
 
@@ -344,33 +502,65 @@ def run_scheduler(classroom_types, classrooms, class_list, classes, teachers, pe
 
     prioritize_sections(ctx)
 
+    # === DIAGNOSTIC: Analyze section_index=18 before search begins ===
+    # Uncomment the following line to run diagnostics:
+    # diagnose_section(ctx, 17)
+    
     # Attempt full recursive search (Period x Room x Teacher)
     success = solve_recursive_full(ctx)
 
     if success:
-        print("✨ SUCCESS: Fully valid schedule found by recursive solver.")
+        print("SUCCESS: Fully valid schedule found by recursive solver.")
     else:
-        print("❌ CRITICAL: No valid full assignment found by recursive solver!")
-        print("⚠️ Falling back to greedy pipeline to produce a partial schedule for inspection.")
+        print("CRITICAL: No valid full assignment found by recursive solver!")
+        print(f"⚠️ Restoring deepest partial solution from recursion: {ctx.best_section_index}/{len(ctx.all_sections)} sections placed.")
 
-        # Reset any partial state produced by the failed recursive attempt
-        for p in ctx.periods:
-            p.assigned_sections.clear()
-        for s in ctx.all_sections:
-            s.assigned_teacher = None
-            s.assigned_classroom = None
-
-        # Reset scoreboard matrices
+        # Restore the best partial solution from recursion
         for t in ctx.teachers:
-            ctx.teacher_schedule[t.name] = {p.period_id: None for p in ctx.periods}
-            ctx.teacher_load[t.name] = 0
+            ctx.teacher_schedule[t.name] = dict(ctx.best_teacher_schedule[t.name])
+        ctx.teacher_load = dict(ctx.best_teacher_load)
         for r in ctx.classrooms:
-            ctx.room_schedule[r.name] = {p.period_id: None for p in ctx.periods}
+            ctx.room_schedule[r.name] = dict(ctx.best_room_schedule[r.name])
+        for p in ctx.periods:
+            p.assigned_sections = list(ctx.best_period_assignments[p.period_id])
 
-        # Run greedy fallback (periods -> rooms -> teachers with swaps)
-        assign_sections_to_periods(ctx.all_sections, periods, classroom_types)
-        assign_classrooms_to_sections(periods, classrooms, classroom_types, ctx)
-        assign_teachers_to_sections(ctx)
+        # Restore section assignments based on room schedule
+        for r in ctx.classrooms:
+            for p_id, section in ctx.room_schedule[r.name].items():
+                if section is not None:
+                    section.assigned_classroom = r
+                    # Find the period
+                    for p in ctx.periods:
+                        if p.period_id == p_id:
+                            if section not in p.assigned_sections:
+                                p.assigned_sections.append(section)
+                            break
+
+        # Restore teacher assignments
+        for t in ctx.teachers:
+            for p_id, section in ctx.teacher_schedule[t.name].items():
+                if section is not None:
+                    section.assigned_teacher = t
+
+        # NOTE: Greedy fallback is disabled - using deepest recursive solution instead
+        # # Reset any partial state produced by the failed recursive attempt
+        # for p in ctx.periods:
+        #     p.assigned_sections.clear()
+        # for s in ctx.all_sections:
+        #     s.assigned_teacher = None
+        #     s.assigned_classroom = None
+
+        # # Reset scoreboard matrices
+        # for t in ctx.teachers:
+        #     ctx.teacher_schedule[t.name] = {p.period_id: None for p in ctx.periods}
+        #     ctx.teacher_load[t.name] = 0
+        # for r in ctx.classrooms:
+        #     ctx.room_schedule[r.name] = {p.period_id: None for p in ctx.periods}
+
+        # # Run greedy fallback (periods -> rooms -> teachers with swaps)
+        # assign_sections_to_periods(ctx.all_sections, periods, classroom_types)
+        # assign_classrooms_to_sections(periods, classrooms, classroom_types, ctx)
+        # assign_teachers_to_sections(ctx)
 
     total = len(ctx.all_sections)
     fully_assigned = sum(1 for s in ctx.all_sections if s.is_fully_assigned())
@@ -380,11 +570,11 @@ def run_scheduler(classroom_types, classrooms, class_list, classes, teachers, pe
         # already printed success above
         pass
     elif not success and fully_assigned == total:
-        print("✨ Greedy fallback produced a full assignment (unexpected).")
+        print("Deepest recursive solution produced a full assignment (unexpected).")
     elif unassigned_count == 0:
-        print("✨ SUCCESS: All sections are fully assigned (rooms + teachers).")
+        print("SUCCESS: All sections are fully assigned (rooms + teachers).")
     else:
-        print("⚠️ PARTIAL: Some sections remain unassigned after fallback.")
+        print("⚠️ PARTIAL: Using deepest solution from recursive solver.")
         print(f"  ✓ Fully assigned: {fully_assigned}/{total}")
         print(f"  ✗ Unassigned: {unassigned_count}/{total}")
 
@@ -392,7 +582,7 @@ def run_scheduler(classroom_types, classrooms, class_list, classes, teachers, pe
     try:
         check(periods)
     except Exception as e:
-        print(f"❌ Schedule validation failed: {e}")
+        print(f"!! Schedule validation failed: {e}")
 
     return ctx.all_sections
 
@@ -440,3 +630,105 @@ def check(periods):
                 used_classroom_names.add(c.name)
     
     print("✅ Check passed - No scheduling conflicts detected")
+
+
+def diagnose_section(ctx: SchedulingContext, section_index: int):
+    """
+    Diagnostic function to analyze a specific section and the dataset.
+    Call this right before the search begins to understand why the solver gets stuck.
+    
+    This will help identify:
+    1. If the dataset is mathematically impossible (e.g., more Lab sections than Lab slots)
+    2. If section_index is particularly constrained
+    3. Global resource availability analysis
+    """
+    print("\n" + "="*70)
+    print(f"DIAGNOSTIC ANALYSIS for section_index={section_index}")
+    print("="*70)
+    
+    # --- 1. Analyze the specific problematic section ---
+    if section_index < len(ctx.all_sections):
+        section = ctx.all_sections[section_index]
+        print(f"\nPROBLEMATIC SECTION: {section.section_id}")
+        print(f"   Class: {section.class_name}")
+        print(f"   Required room type: {section.required_classroom_type}")
+        
+        # Count valid teachers and rooms
+        valid_teachers = ctx.valid_teachers.get(section.section_id, [])
+        valid_rooms = ctx.valid_rooms.get(section.section_id, [])
+        
+        print(f"   Valid teachers: {len(valid_teachers)} - {[t.name for t in valid_teachers]}")
+        print(f"   Valid rooms: {len(valid_rooms)} - {[r.name for r in valid_rooms]}")
+        
+        # Calculate available (period, room, teacher) triples
+        available_triples = 0
+        for period in ctx.periods:
+            p_id = period.period_id
+            for room in valid_rooms:
+                # Check if room is free in this period
+                if ctx.room_schedule[room.name][p_id] is not None:
+                    continue
+                for teacher in valid_teachers:
+                    # Check if teacher is free in this period and has capacity
+                    if ctx.teacher_schedule[teacher.name][p_id] is not None:
+                        continue
+                    if ctx.teacher_load[teacher.name] >= teacher.max_sections:
+                        continue
+                    available_triples += 1
+        print(f"   Available (Period, Room, Teacher) triples: {available_triples}")
+    else:
+        print(f"\n⚠️ section_index={section_index} is out of range (total sections: {len(ctx.all_sections)})")
+    
+    # --- 2. Global resource availability ---
+    print("\nGLOBAL RESOURCE ANALYSIS:")
+    
+    # Count sections by classroom type
+    sections_by_type = {}
+    for section in ctx.all_sections:
+        rtype = section.required_classroom_type
+        sections_by_type[rtype] = sections_by_type.get(rtype, 0) + 1
+    
+    print("\n   Sections by required classroom type:")
+    for rtype, count in sorted(sections_by_type.items()):
+        # Count compatible rooms
+        compatible_rooms = [r for r in ctx.classrooms if rtype in r.purposes]
+        # Total slots = compatible_rooms * periods
+        total_slots = len(compatible_rooms) * len(ctx.periods)
+        print(f"      {rtype}: {count} sections, {len(compatible_rooms)} rooms, {total_slots} total slots")
+        if count > total_slots:
+            print(f"         ⚠️ IMPOSSIBLE: {count} sections > {total_slots} slots!")
+    
+    # Count teacher capacity by subject
+    print("\n   Teacher capacity by subject:")
+    teacher_capacity = {}
+    for teacher in ctx.teachers:
+        for subject in teacher.subjects:
+            teacher_capacity[subject] = teacher_capacity.get(subject, 0) + teacher.max_sections
+    
+    # Count sections needing each subject
+    sections_by_subject = {}
+    for section in ctx.all_sections:
+        subject = section.class_name
+        sections_by_subject[subject] = sections_by_subject.get(subject, 0) + 1
+    
+    for subject, section_count in sorted(sections_by_subject.items()):
+        capacity = teacher_capacity.get(subject, 0)
+        print(f"      {subject}: {section_count} sections, {capacity} teacher slots")
+        if section_count > capacity:
+            print(f"         ⚠️ IMPOSSIBLE: {section_count} sections > {capacity} teacher slots!")
+    
+    # --- 3. Domain size summary for all sections (after prioritization) ---
+    print("\nSECTION DOMAIN SIZES (after prioritization):")
+    for i, section in enumerate(ctx.all_sections):
+        valid_teachers = ctx.valid_teachers.get(section.section_id, [])
+        valid_rooms = ctx.valid_rooms.get(section.section_id, [])
+        
+        # Calculate theoretical max options (periods * rooms * teachers)
+        max_options = len(valid_rooms) * len(valid_teachers) * len(ctx.periods)
+        
+        marker = " <-- PROBLEM" if i == section_index else ""
+        print(f"   [{i:2d}] {section.section_id}: {len(valid_teachers)} teachers, {len(valid_rooms)} rooms, {max_options} theoretical options{marker}")
+    
+    print("\n" + "="*70)
+    print("DIAGNOSTIC COMPLETE")
+    print("="*70 + "\n")

@@ -25,21 +25,9 @@ class Class:
 @dataclass
 class Teacher:
     name: str
-    subjects: Set[str]  # subject/class names they're qualified for
+    subjects: Set[str]
     max_sections: int
     assigned_count: int
-    #assigned_sections: List[str] = field(default_factory=list)
-    
-    def can_take_class(self, section_name: str) -> bool:
-        return (section_name in self.subjects and 
-                len(self.assigned_sections) < self.max_sections)
-    
-    def assign_class(self, section_name: str) -> bool:
-        if self.can_take_class(section_name):
-            self.assigned_sections.append(section_name)
-            return True
-        return False
-    
     
 @dataclass
 class Section:
@@ -291,7 +279,7 @@ def balanced_school_medium():
         
         # English (3 teachers)
         Teacher("Ms. Johnson", subjects={"English 9", "English 10"}, max_sections=3, assigned_count=0),
-        Teacher("Mr. Smith", subjects={"English 11", "English 12"}, max_sections=3, assigned_count=0),
+        Teacher("Mr. Smith", subjects={"English 11", "English 12"}, max_sections=4, assigned_count=0),
         Teacher("Ms. Taylor", subjects={"English 9", "English 10", "Drama"}, max_sections=3, assigned_count=0),
         
         # Social Studies (2 teachers)
