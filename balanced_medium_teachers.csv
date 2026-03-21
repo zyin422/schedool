@@ -1,0 +1,18 @@
+name,subjects,max_sections
+Dr. Wilson,Biology,3
+Dr. Martinez,Chemistry,3
+Dr. Anderson,Physics,3
+Ms. Green,"Biology,Chemistry",2
+Ms. Davis,"Algebra I,Algebra II,Geometry",4
+Mr. Lee,"Algebra I,Geometry",3
+Ms. Rodriguez,"Pre-Calculus,Calculus,Algebra II",3
+Ms. Johnson,"English 9,English 10",3
+Mr. Smith,"English 11,English 12",4
+Ms. Taylor,"English 9,English 10,Drama",3
+Mr. Adams,"World History,US History",4
+Ms. Clark,"Government,Economics,Business",4
+Sra. Hernandez,"Spanish I,Spanish II,French I",4
+Ms. Rivera,"Art I,Art II",3
+Mr. Hall,"Band,Choir",2
+Coach Davis,"PE 9,PE 10,Health",5
+Mr. Singh,"Intro to CS,AP CompSci A",2

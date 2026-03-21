@@ -1,0 +1,31 @@
+name,num_sections,required_classroom_type
+Biology,2,Biology
+Chemistry,2,Chemistry
+Physics,2,Physics
+Algebra I,2,General
+Algebra II,2,General
+Geometry,2,General
+Pre-Calculus,1,General
+Calculus,1,General
+English 9,2,General
+English 10,2,General
+English 11,2,General
+English 12,2,General
+World History,2,General
+US History,2,General
+Government,2,General
+Economics,1,General
+Spanish I,2,General
+Spanish II,1,General
+French I,1,General
+Art I,2,Art
+Art II,1,Art
+Band,1,Music
+Choir,1,Music
+PE 9,2,PE
+PE 10,2,PE
+Health,1,General
+Intro to CS,1,CompSci
+AP CompSci A,1,CompSci
+Drama,1,General
+Business,1,General

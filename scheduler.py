@@ -79,7 +79,7 @@ class SchedulingContext:
     search_start_time: float = 0.0      # time.time() when search started
     search_last_report: int = 0         # last node count we reported at
     search_max_nodes: int = 10_000_000   # bail-out node budget (tune as needed)
-    search_max_seconds: int = 120        # bail-out time budget (seconds)
+    search_max_seconds: int = 5        # bail-out time budget (seconds)
 
     # --- tracking best partial solution ---
     best_section_index: int = -1         # deepest section index reached (-1 = not initialized)

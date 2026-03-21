@@ -1,0 +1,7 @@
+name,num_sections,required_classroom_type
+Math,3,General
+English,3,General
+Science,2,Science
+Art,2,Art
+Music,1,Music
+PE,2,PE
