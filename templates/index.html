@@ -3,217 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BISV Scheduler</title>
+    <title>School Scheduler - Copilot</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 2rem; margin-bottom: 10px; }
+        .header p { opacity: 0.9; }
+        .content { padding: 30px; }
         
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+        .form-section { margin-bottom: 30px; }
+        .form-section h2 { color: #333; font-size: 1.2rem; margin-bottom: 15px; }
         
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-        }
+        .file-input-wrapper { position: relative; margin-bottom: 15px; }
+        .file-input-wrapper input[type="file"] { width: 100%; padding: 12px; border: 2px dashed #ddd; border-radius: 8px; cursor: pointer; }
+        .file-input-wrapper input[type="file"]:hover { border-color: #667eea; background: #f8f9ff; }
+        .file-input-wrapper label { display: block; font-weight: 500; color: #555; margin-bottom: 5px; }
         
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
+        .btn { display: inline-block; padding: 14px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102,126,234,0.4); }
+        .btn-outline { background: transparent; border: 2px solid #667eea; color: #667eea; margin-right: 10px; }
+        .btn-outline:hover { background: #667eea; color: white; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
         
-        .header h1 {
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
+        .checkbox-wrapper { display: flex; align-items: center; gap: 10px; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+        .checkbox-wrapper input[type="checkbox"] { width: 20px; height: 20px; }
+        .checkbox-wrapper label { font-weight: 500; color: #333; cursor: pointer; }
         
-        .header p {
-            opacity: 0.9;
-        }
+        .flash-messages { margin-bottom: 20px; }
+        .flash { padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; }
+        .flash.error { background: #fee; color: #c33; border: 1px solid #fcc; }
+        .flash.success { background: #efe; color: #3c3; border: 1px solid #cfc; }
         
-        .content {
-            padding: 30px;
-        }
+        .data-status { background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+        .data-status h3 { color: #2e7d32; margin-bottom: 10px; font-size: 1rem; }
+        .data-status p { color: #555; font-size: 0.9rem; margin-bottom: 5px; }
         
-        .form-section {
-            margin-bottom: 30px;
-        }
-        
-        .form-section h2 {
-            color: #333;
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .form-section h2 .required {
-            color: #e74c3c;
-            font-size: 0.8rem;
-        }
-        
-        .file-input-wrapper {
-            position: relative;
-            margin-bottom: 15px;
-        }
-        
-        .file-input-wrapper input[type="file"] {
-            width: 100%;
-            padding: 12px;
-            border: 2px dashed #ddd;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .file-input-wrapper input[type="file"]:hover {
-            border-color: #667eea;
-            background: #f8f9ff;
-        }
-        
-        .file-input-wrapper label {
-            display: block;
-            font-weight: 500;
-            color: #555;
-            margin-bottom: 5px;
-        }
-        
-        .file-input-wrapper .hint {
-            font-size: 0.85rem;
-            color: #888;
-            margin-top: 5px;
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 14px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            width: 100%;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-            margin-top: 15px;
-        }
-        
-        .btn-secondary:hover {
-            background: #5a6268;
-            box-shadow: 0 10px 30px rgba(108, 117, 125, 0.4);
-        }
-        
-        .sample-files {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        
-        .sample-files h3 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 1rem;
-        }
-        
-        .sample-links {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-        
-        .sample-links a {
-            display: block;
-            padding: 10px 15px;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            text-decoration: none;
-            color: #667eea;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
-        
-        .sample-links a:hover {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-        
-        .flash-messages {
-            margin-bottom: 20px;
-        }
-        
-        .flash {
-            padding: 12px 20px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-        }
-        
-        .flash.error {
-            background: #fee;
-            color: #c33;
-            border: 1px solid #fcc;
-        }
-        
-        .flash.success {
-            background: #efe;
-            color: #3c3;
-            border: 1px solid #cfc;
-        }
-        
-        .format-info {
-            background: #e8f4fd;
-            border: 1px solid #b8daff;
-            border-radius: 6px;
-            padding: 15px;
-            margin-top: 20px;
-        }
-        
-        .format-info h4 {
-            color: #004085;
-            margin-bottom: 10px;
-            font-size: 0.95rem;
-        }
-        
-        .format-info code {
-            background: white;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.85rem;
-        }
-        
-        .format-info pre {
-            background: white;
-            padding: 10px;
-            border-radius: 4px;
-            overflow-x: auto;
-            font-size: 0.8rem;
-            margin-top: 10px;
-        }
+        .sample-files { background: #f8f9fa; border-radius: 8px; padding: 20px; margin-top: 20px; }
+        .sample-files h3 { color: #333; margin-bottom: 15px; font-size: 1rem; }
+        .sample-links { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .sample-links a { display: block; padding: 10px 15px; background: white; border: 1px solid #ddd; border-radius: 6px; text-decoration: none; color: #667eea; font-size: 0.9rem; }
+        .sample-links a:hover { background: #667eea; color: white; border-color: #667eea; }
     </style>
 </head>
 <body>
@@ -234,74 +65,61 @@
                 {% endif %}
             {% endwith %}
             
-            <form action="/run" method="POST" enctype="multipart/form-data">
+            {% if session.get('available_teachers') %}
+            <div class="data-status">
+                <h3>✅ Data Loaded</h3>
+                <p><strong>Teachers:</strong> {{ session.get('available_teachers', [])|length }} loaded</p>
+                <p><strong>Classrooms:</strong> {{ session.get('available_rooms', [])|length }} loaded</p>
+                <p><strong>Classes:</strong> {{ session.get('available_classes', [])|length }} loaded</p>
+                <p><strong>Periods:</strong> {{ session.get('available_periods', [])|length }} loaded</p>
+            </div>
+            {% endif %}
+            
+            <form action="/upload_data" method="POST" enctype="multipart/form-data">
                 <div class="form-section">
-                    <h2>
-                        📁 Upload CSV Files
-                        <span class="required">* Required</span>
-                    </h2>
+                    <h2>📁 Upload CSV Files</h2>
                     
                     <div class="file-input-wrapper">
                         <label>Classrooms CSV *</label>
                         <input type="file" name="classrooms" accept=".csv" required>
-                        <div class="hint">Format: name, size, purposes (comma-separated)</div>
                     </div>
                     
                     <div class="file-input-wrapper">
                         <label>Classes CSV *</label>
                         <input type="file" name="classes" accept=".csv" required>
-                        <div class="hint">Format: name, num_sections, required_classroom_type</div>
                     </div>
                     
                     <div class="file-input-wrapper">
                         <label>Teachers CSV</label>
                         <input type="file" name="teachers" accept=".csv">
-                        <div class="hint">Format: name, subjects (comma-separated), max_sections. Optional - will auto-generate if not provided.</div>
                     </div>
                     
                     <div class="file-input-wrapper">
                         <label>Periods CSV</label>
                         <input type="file" name="periods" accept=".csv">
-                        <div class="hint">Format: period_id. Optional - defaults to P1-P5 if not provided.</div>
                     </div>
                 </div>
                 
-                <button type="submit" class="btn">🚀 Run Scheduler</button>
+                <div class="btn-group">
+                    <button type="submit" name="action" value="upload" class="btn">📤 Upload & Load Data</button>
+                    {% if session.get('available_teachers') %}
+                    <a href="/constraints" class="btn btn-outline">⚙️ Manage Soft Constraints →</a>
+                    <button type="submit" name="action" value="run" class="btn">🚀 Run Scheduler</button>
+                    {% endif %}
+                </div>
             </form>
             
+            {% if not session.get('available_teachers') %}
             <div class="sample-files">
                 <h3>📥 Download Sample CSV Files</h3>
                 <div class="sample-links">
                     <a href="data:text/csv;charset=utf-8,name,size,purposes%0ARoom-101,30,General%0ARoom-102,30,General%0ARoom-103,25,Science%0ALab-201,20,Science%0AArt-301,25,Art" download="classrooms.csv">Classrooms CSV</a>
                     <a href="data:text/csv;charset=utf-8,name,num_sections,required_classroom_type%0AMath,3,General%0AEnglish,3,General%0AScience,2,Science%0AArt,2,Art" download="classes.csv">Classes CSV</a>
-                    <a href="data:text/csv;charset=utf-8,name,subjects,max_sections%0AMr.%20Smith,Math,3%0AMs.%20Jones,English,3%0ADr.%20Brown,Science,2%0AMrs.%20Davis,Art,2" download="teachers.csv">Teachers CSV</a>
+                    <a href="data:text/csv;charset=utf-8,name,subjects,max_sections%0AMr.%20Smith,\"Math,English\",3%0AMs.%20Jones,\"Math,English\",3%0ADr.%20Brown,Science,2%0AMrs.%20Davis,Art,2" download="teachers.csv">Teachers CSV</a>
                     <a href="data:text/csv;charset=utf-8,period_id%0AP1%0AP2%0AP3%0AP4%0AP5" download="periods.csv">Periods CSV</a>
                 </div>
             </div>
-            
-            <div class="format-info">
-                <h4>📋 CSV Format Reference</h4>
-                <p>The scheduler expects CSV files with the following columns:</p>
-                <pre>
-<b>Classrooms:</b>
-name,size,purposes
-Room-101,30,General
-Lab-201,20,Science
-
-<b>Classes:</b>
-name,num_sections,required_classroom_type
-Math,3,General
-Science,2,Science
-
-<b>Teachers:</b>
-name,subjects,max_sections
-Mr. Smith,"Math,English",3
-
-<b>Periods:</b>
-period_id
-P1
-P2</pre>
-            </div>
+            {% endif %}
         </div>
     </div>
 </body>

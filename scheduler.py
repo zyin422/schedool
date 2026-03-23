@@ -732,3 +732,151 @@ def diagnose_section(ctx: SchedulingContext, section_index: int):
     print("\n" + "="*70)
     print("DIAGNOSTIC COMPLETE")
     print("="*70 + "\n")
+
+# =============================================================================
+# MULTI-SCHEDULE GENERATION WITH RANDOMIZATION
+# =============================================================================
+
+import random
+from copy import deepcopy
+
+
+def assign_sections_to_periods_randomized(sections, periods, classroom_types, rng):
+    """Randomized version - shuffles classroom types and sections."""
+    shuffled_types = list(classroom_types)
+    rng.shuffle(shuffled_types)
+    
+    period_idx = 0
+    for c_type in shuffled_types:
+        type_sections = [s for s in sections if s.required_classroom_type == c_type]
+        rng.shuffle(type_sections)
+        
+        for section in type_sections:
+            periods[period_idx % len(periods)].assigned_sections.append(section)
+            period_idx += 1
+
+
+def assign_classrooms_to_sections_randomized(periods, classrooms, classroom_types, ctx, rng):
+    """Randomized version - shuffles room selection order."""
+    for p in periods:
+        used_room_names = set()
+        for section in p.assigned_sections:
+            valid_rooms = ctx.valid_rooms.get(section.section_id, [])
+            shuffled_rooms = list(valid_rooms)
+            rng.shuffle(shuffled_rooms)
+            
+            for room in shuffled_rooms:
+                if room.name in used_room_names:
+                    continue
+                if ctx.room_schedule.get(room.name, {}).get(p.period_id) is not None:
+                    used_room_names.add(room.name)
+                    continue
+                section.assigned_classroom = room
+                ctx.room_schedule[room.name][p.period_id] = section
+                used_room_names.add(room.name)
+                break
+
+
+def assign_teachers_to_sections_randomized(ctx, rng):
+    """Randomized version - shuffles teacher selection order."""
+    for p in ctx.periods:
+        for section in p.assigned_sections:
+            if section.assigned_teacher:
+                teacher = section.assigned_teacher
+                if isinstance(teacher, Teacher):
+                    ctx.teacher_schedule[teacher.name][p.period_id] = section
+                    ctx.teacher_load[teacher.name] += 1
+                continue
+
+            valid_teachers = ctx.valid_teachers.get(section.section_id, [])
+            shuffled_teachers = list(valid_teachers)
+            rng.shuffle(shuffled_teachers)
+
+            for t in shuffled_teachers:
+                if ctx.teacher_schedule[t.name][p.period_id] is None and ctx.teacher_load[t.name] < t.max_sections:
+                    section.assigned_teacher = t
+                    ctx.teacher_schedule[t.name][p.period_id] = section
+                    ctx.teacher_load[t.name] += 1
+                    break
+
+            if section.assigned_teacher:
+                continue
+
+            for qt in shuffled_teachers:
+                conflicting_section = ctx.teacher_schedule[qt.name][p.period_id]
+                if conflicting_section is None:
+                    continue
+
+                alt_teachers = ctx.valid_teachers.get(conflicting_section.section_id, [])
+                rng.shuffle(alt_teachers)
+
+                for alt in alt_teachers:
+                    if alt.name == qt.name:
+                        continue
+                    if ctx.teacher_schedule[alt.name][p.period_id] is None and ctx.teacher_load[alt.name] < alt.max_sections:
+                        conflicting_section.assigned_teacher = alt
+                        ctx.teacher_schedule[alt.name][p.period_id] = conflicting_section
+                        ctx.teacher_load[alt.name] += 1
+
+                        ctx.teacher_schedule[qt.name][p.period_id] = None
+                        ctx.teacher_load[qt.name] -= 1
+
+                        section.assigned_teacher = qt
+                        ctx.teacher_schedule[qt.name][p.period_id] = section
+                        ctx.teacher_load[qt.name] += 1
+                        break
+
+
+def run_scheduler_with_seed(classroom_types, classrooms, class_list, classes, teachers, periods, seed=None):
+    """Run scheduler with a specific seed for randomization."""
+    rng = random.Random(seed)
+    
+    sections = generate_sections(classes)
+    ctx = build_scheduling_context(sections, teachers, classrooms, periods)
+    prioritize_sections(ctx)
+    
+    for p in periods:
+        p.assigned_sections.clear()
+    
+    for t in ctx.teachers:
+        ctx.teacher_schedule[t.name] = {p.period_id: None for p in periods}
+        ctx.teacher_load[t.name] = 0
+    for r in ctx.classrooms:
+        ctx.room_schedule[r.name] = {p.period_id: None for p in periods}
+    
+    assign_sections_to_periods_randomized(sections, periods, classroom_types, rng)
+    assign_classrooms_to_sections_randomized(periods, classrooms, classroom_types, ctx, rng)
+    assign_teachers_to_sections_randomized(ctx, rng)
+    
+    return sections, periods, ctx
+
+
+def generate_multiple_schedules(classroom_types, classrooms, class_list, classes, teachers, periods, num_schedules=50):
+    """Generate multiple schedule variants with different randomization seeds."""
+    results = []
+    
+    for i in range(num_schedules):
+        seed = i * 12345
+        rng = random.Random(seed)
+        
+        periods_copy = [Period(p.period_id) for p in periods]
+        
+        classrooms_copy = [Classroom(c.name, c.size, set(c.purposes)) for c in classrooms]
+        
+        teachers_copy = [Teacher(t.name, set(t.subjects), t.max_sections, 0) for t in teachers]
+        
+        classes_copy = [Class(c.name, c.num_sections, c.required_classroom_type) for c in classes]
+        
+        sections, final_periods, ctx = run_scheduler_with_seed(
+            classroom_types, classrooms_copy, class_list, classes_copy, 
+            teachers_copy, periods_copy, seed
+        )
+        
+        results.append({
+            'seed': seed,
+            'sections': sections,
+            'periods': final_periods,
+            'teachers': teachers_copy
+        })
+    
+    return results

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Constraints - School Scheduler</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 1.5rem; }
+        .content { padding: 30px; }
+        
+        .constraint-form { background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .form-row.full { grid-template-columns: 1fr; }
+        label { display: block; font-weight: 500; color: #333; margin-bottom: 5px; }
+        select, input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; }
+        
+        .checkbox-group { display: flex; gap: 15px; flex-wrap: wrap; }
+        .checkbox-group label { font-weight: normal; display: flex; align-items: center; gap: 5px; }
+        
+        .weight-slider { display: flex; align-items: center; gap: 10px; }
+        .weight-slider input[type="range"] { flex: 1; }
+        .weight-slider span { font-weight: bold; color: #667eea; min-width: 30px; }
+        
+        .btn { display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102,126,234,0.4); }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { box-shadow: 0 5px 20px rgba(220,53,69,0.4); }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { box-shadow: 0 5px 20px rgba(108,117,125,0.4); }
+        
+        .constraints-list { margin-top: 30px; }
+        .constraints-list h2 { color: #333; margin-bottom: 15px; }
+        
+        .constraint-item { background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .constraint-info { display: flex; align-items: center; gap: 15px; }
+        .constraint-type { background: #e8f4fd; color: #0369a1; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; font-weight: 500; }
+        .constraint-applies { color: #333; font-weight: 500; }
+        .constraint-weight { background: #f0f9ff; color: #0369a1; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; }
+        
+        .empty-state { text-align: center; padding: 40px; color: #888; }
+        .empty-state p { margin-bottom: 15px; }
+        
+        .actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        
+        .param-display { font-size: 0.85rem; color: #666; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚙️ Soft Constraints</h1>
+            <a href="/" class="btn btn-secondary">← Back to Upload</a>
+        </div>
+        
+        <div class="content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}" style="padding: 12px; border-radius: 6px; margin-bottom: 15px; {% if category == 'error' %}background: #fee; color: #c33;{% else %}background: #efe; color: #3c3;{% endif %}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <div class="constraint-form">
+                <h2 style="margin-bottom: 15px; color: #333;">Add New Constraint</h2>
+                <form method="POST" action="/constraints">
+                    <div class="form-row">
+                        <div>
+                            <label>Constraint Type *</label>
+                            <select name="constraint_type" id="constraintType" required>
+                                <option value="">Select type...</option>
+                                <option value="teacher_morning_pref">Teacher Morning Preference</option>
+                                <option value="teacher_afternoon_pref">Teacher Afternoon Preference</option>
+                                <option value="room_unavailable">Room Unavailable</option>
+                                <option value="max_consecutive">Max Consecutive Periods</option>
+                                <option value="spread_class_sections">Spread Class Sections</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Applies To *</label>
+                            <select name="applies_to" id="appliesTo" required>
+                                <option value="">Select...</option>
+                                {% if teachers %}
+                                <optgroup label="Teachers">
+                                    {% for t in teachers %}
+                                    <option value="{{ t }}">{{ t }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                                {% endif %}
+                                {% if rooms %}
+                                <optgroup label="Rooms">
+                                    {% for r in rooms %}
+                                    <option value="{{ r }}">{{ r }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                                {% endif %}
+                                {% if classes %}
+                                <optgroup label="Classes">
+                                    {% for c in classes %}
+                                    <option value="{{ c }}">{{ c }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row full" id="morningParams" style="display:none;">
+                        <div>
+                            <label>Preferred Morning Periods</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="preferred_morning" value="Period 1"> Period 1</label>
+                                <label><input type="checkbox" name="preferred_morning" value="Period 2"> Period 2</label>
+                                <label><input type="checkbox" name="preferred_morning" value="Period 3"> Period 3</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row full" id="afternoonParams" style="display:none;">
+                        <div>
+                            <label>Preferred Afternoon Periods</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="preferred_afternoon" value="Period 3"> Period 3</label>
+                                <label><input type="checkbox" name="preferred_afternoon" value="Period 4"> Period 4</label>
+                                <label><input type="checkbox" name="preferred_afternoon" value="Period 5"> Period 5</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row" id="roomParams" style="display:none;">
+                        <div>
+                            <label>Blocked Period</label>
+                            <select name="blocked_period">
+                                <option value="Period 1">Period 1</option>
+                                <option value="Period 2">Period 2</option>
+                                <option value="Period 3">Period 3</option>
+                                <option value="Period 4">Period 4</option>
+                                <option value="Period 5">Period 5</option>
+                            </select>
+                        </div>
+                        <div></div>
+                    </div>
+                    
+                    <div class="form-row" id="consecutiveParams" style="display:none;">
+                        <div>
+                            <label>Maximum Consecutive Periods</label>
+                            <input type="number" name="max_consecutive" value="3" min="1" max="5">
+                        </div>
+                        <div></div>
+                    </div>
+                    
+                    <div class="form-row full">
+                        <div>
+                            <label>Weight (1-10): <span id="weightValue">5</span></label>
+                            <div class="weight-slider">
+                                <input type="range" name="weight" min="1" max="10" value="5" oninput="document.getElementById('weightValue').textContent = this.value">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn">Add Constraint</button>
+                </form>
+            </div>
+            
+            <div class="constraints-list">
+                <h2>Current Constraints ({{ constraints|length }})</h2>
+                
+                {% if constraints %}
+                    {% for c in constraints %}
+                    <div class="constraint-item">
+                        <div class="constraint-info">
+                            <span class="constraint-type">{{ c.type|replace('_', ' ')|title }}</span>
+                            <span class="constraint-applies">{{ c.applies_to }}</span>
+                            <span class="constraint-weight">{{ c.weight }} pts</span>
+                            {% if c.parameters %}
+                            <span class="param-display">{% for k,v in c.parameters.items() %}{{ k }}: {{ v }} {% endfor %}</span>
+                            {% endif %}
+                        </div>
+                        <a href="/constraints/remove/{{ c.id }}" class="btn btn-danger" style="padding: 8px 16px; font-size: 0.9rem;">Remove</a>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="actions">
+                        <a href="/constraints/clear" class="btn btn-danger">Clear All Constraints</a>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <p>No constraints added yet.</p>
+                        <p>Add constraints above to guide the scheduler toward your preferred schedules.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('constraintType').addEventListener('change', function() {
+            var type = this.value;
+            document.getElementById('morningParams').style.display = (type === 'teacher_morning_pref') ? 'block' : 'none';
+            document.getElementById('afternoonParams').style.display = (type === 'teacher_afternoon_pref') ? 'block' : 'none';
+            document.getElementById('roomParams').style.display = (type === 'room_unavailable') ? 'grid' : 'none';
+            document.getElementById('consecutiveParams').style.display = (type === 'max_consecutive') ? 'grid' : 'none';
+        });
+    </script>
+</body>
+</html>
