@@ -84,7 +84,7 @@
             <div class="schedule-card {% if loop.index0 == 0 %}first{% elif loop.index0 == 1 %}second{% else %}third{% endif %}">
                 <div class="schedule-header">
                     <div class="schedule-rank {% if loop.index0 == 0 %}first{% elif loop.index0 == 1 %}second{% else %}third{% endif %}">
-                        🥇 #{{ loop.index + 1 }} {% if loop.index0 == 0 %}Best{% elif loop.index0 == 1 %}Second{% else %}Third{% endif %}
+                        #{{ loop.index0 + 1 }} {% if loop.index0 == 0 %}Best{% elif loop.index0 == 1 %}Second{% else %}Third{% endif %}
                     </div>
                     <div class="score-display">
                         <div class="score-percent">{{ "%.1f"|format(schedule["score"].percentage) }}%</div>

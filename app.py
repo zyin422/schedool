@@ -147,8 +147,16 @@ def run_multiple_schedules_with_constraints(classroom_types, classrooms, class_l
             'score': score_result
         })
     
+    # Convert to tuples for ranking (score_result is ScoreResult object with total_score)
+    schedule_tuples = [(s, s['score']) for s in scored_schedules]
+    
     # Rank and get top 3
-    top_3 = get_top_n_schedules(scored_schedules, 3)
+    ranked_tuples = get_top_n_schedules(schedule_tuples, 3)
+    
+    # Convert back to dict format for template
+    top_3 = [s[0] for s in ranked_tuples]
+    
+    return top_3
     
     return top_3
 
@@ -384,6 +392,10 @@ P5"""
         session['stored_periods'] = [{'period_id': p.period_id} for p in periods]
         session['stored_classroom_types'] = list(classroom_types)
         
+        # Debug: print what we're storing
+        print(f"DEBUG UPLOAD: classrooms: {len(classrooms)}, classes: {len(classes)}, teachers: {len(teachers)}, periods: {len(periods)}")
+        print(f"DEBUG UPLOAD: classroom_types: {classroom_types}")
+        
         # Also store display-friendly data for UI
         session['available_teachers'] = [t.name for t in teachers]
         session['available_rooms'] = [c.name for c in classrooms]
@@ -440,11 +452,19 @@ def run_scheduler_stored():
         classroom_types = set(session.get('stored_classroom_types', []))
         class_list = [c['name'] for c in session.get('stored_classes', [])]
         
+        # Debug: print stored data
+        print(f"DEBUG: classrooms: {len(classrooms)}, classes: {len(classes)}, teachers: {len(teachers)}, periods: {len(periods)}")
+        print(f"DEBUG: classroom_types: {classroom_types}")
+        print(f"DEBUG: class_list: {class_list}")
+        print(f"DEBUG: generate_multiple: {generate_multiple}")
+        
         # Get constraints from session
         constraints_data = session.get('constraints', [])
         constraints = [Constraint.from_dict(c) for c in constraints_data]
+        print(f"DEBUG: constraints: {len(constraints)}")
         
         if generate_multiple:
+            print("DEBUG: About to call run_multiple_schedules_with_constraints")
             top_schedules = run_multiple_schedules_with_constraints(
                 classroom_types, classrooms, class_list, classes, teachers, periods, constraints
             )
@@ -461,7 +481,9 @@ def run_scheduler_stored():
             return redirect(url_for('results'))
     
     except Exception as e:
+        import traceback
         flash(f'Error running scheduler: {str(e)}', 'error')
+        print(f"DEBUG ERROR: {traceback.format_exc()}")
         return redirect(url_for('index'))
 
 

@@ -4,4 +4,6 @@ This is a scheduling algorithm designed to create schedule assignments for BASIS
 
 Generative AI (Claude AI, ChatGPT) was used in this project to brainstorm ideas, create testing datasets, making data visualizations
 
-v1. algorithm logic
+To-do:
+
+- Create hard constraints
