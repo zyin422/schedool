@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Schedool - Schedule Results{% endblock %}
+
+{% block content %}
+<div class="results-section">
+    <div class="results-header">
+        <h2>Schedule Generated Successfully!</h2>
+        <a href="{{ url_for('index') }}" class="back-link">← Upload New Data</a>
+    </div>
+    
+    <div class="stats-summary">
+        <div class="stat-box">
+            <span class="stat-value">{{ stats.classrooms }}</span>
+            <span class="stat-label">Classrooms</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-value">{{ stats.classes }}</span>
+            <span class="stat-label">Classes</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-value">{{ stats.sections }}</span>
+            <span class="stat-label">Sections</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-value">{{ stats.teachers }}</span>
+            <span class="stat-label">Teachers</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-value">{{ stats.periods }}</span>
+            <span class="stat-label">Periods</span>
+        </div>
+    </div>
+    
+    {% if errors %}
+    <div class="validation-errors">
+        <h3>⚠️ Scheduling Conflicts Detected</h3>
+        <ul>
+            {% for error in errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    
+    <div class="schedule-output">
+        {% for item in schedule %}
+            {% if item.type == 'summary' %}
+            <div class="summary-section">
+                <h3>Summary</h3>
+                <div class="summary-stats">
+                    <span class="assigned">{{ item.data.assigned }} assigned</span>
+                    <span class="unassigned">{{ item.data.unassigned }} unassigned</span>
+                </div>
+            </div>
+            
+            {% elif item.type == 'header' %}
+            <h3 class="section-header">{{ item.title }}</h3>
+            
+            {% elif item.type == 'period' %}
+            <div class="period-block">
+                <h4 class="period-title">{{ item.data.period_id }}</h4>
+                {% if item.data.sections %}
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Classroom</th>
+                            <th>Section</th>
+                            <th>Teacher</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for section in item.data.sections %}
+                        <tr>
+                            <td>{{ section.classroom }}</td>
+                            <td>{{ section.section_id }}</td>
+                            <td>{{ section.teacher }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="empty-period">No classes scheduled</p>
+                {% endif %}
+            </div>
+            
+            {% elif item.type == 'teacher' %}
+            <div class="utilization-row teacher-row">
+                <span class="item-name">{{ item.data.name }}</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ item.data.percentage }}%"></div>
+                </div>
+                <span class="utilization-text">{{ item.data.assigned }}/{{ item.data.max }} ({{ "%.0f"|format(item.data.percentage) }}%)</span>
+                <span class="item-detail">{{ item.data.subjects }}</span>
+            </div>
+            
+            {% elif item.type == 'classroom' %}
+            <div class="utilization-row classroom-row">
+                <span class="item-name">{{ item.data.name }}</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ item.data.percentage }}%"></div>
+                </div>
+                <span class="utilization-text">{{ item.data.count }}/{{ item.data.total }} ({{ "%.0f"|format(item.data.percentage) }}%)</span>
+            </div>
+            
+            {% elif item.type == 'unassigned' %}
+            <div class="unassigned-item">
+                <span class="unassigned-section">{{ item.data.section_id }}</span>
+                <span class="missing-info">Missing: {{ item.data.missing }}</span>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

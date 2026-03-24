@@ -367,7 +367,24 @@ P5"""
             periods_file.read().decode('utf-8') if periods_file and periods_file.filename else default_periods
         )
         
-        # Store data in session (only serializable data)
+        # Store data objects in session (serializable versions of scheduler objects)
+        # Store as dicts so they can be reconstructed
+        session['stored_classrooms'] = [
+            {'name': c.name, 'size': c.size, 'purposes': list(c.purposes)}
+            for c in classrooms
+        ]
+        session['stored_classes'] = [
+            {'name': c.name, 'num_sections': c.num_sections, 'required_classroom_type': c.required_classroom_type}
+            for c in classes
+        ]
+        session['stored_teachers'] = [
+            {'name': t.name, 'subjects': list(t.subjects), 'max_sections': t.max_sections}
+            for t in teachers
+        ]
+        session['stored_periods'] = [{'period_id': p.period_id} for p in periods]
+        session['stored_classroom_types'] = list(classroom_types)
+        
+        # Also store display-friendly data for UI
         session['available_teachers'] = [t.name for t in teachers]
         session['available_rooms'] = [c.name for c in classrooms]
         session['available_classes'] = [c.name for c in classes]
@@ -399,6 +416,52 @@ P5"""
         
     except Exception as e:
         flash(f'Error: {str(e)}', 'error')
+        return redirect(url_for('index'))
+
+
+@app.route('/run_scheduler', methods=['POST'])
+def run_scheduler_stored():
+    """Run the scheduler using stored data from session"""
+    global last_schedule_result
+    
+    # Check if data is stored in session
+    if not session.get('stored_classes'):
+        flash('No data stored. Please upload CSV files first.', 'error')
+        return redirect(url_for('index'))
+    
+    generate_multiple = request.form.get('generate_multiple') == 'on'
+    
+    try:
+        # Reconstruct scheduler objects from stored data
+        classrooms = [Classroom(name=c['name'], size=c['size'], purposes=set(c['purposes'])) for c in session.get('stored_classrooms', [])]
+        classes = [Class(name=c['name'], num_sections=c['num_sections'], required_classroom_type=c['required_classroom_type']) for c in session.get('stored_classes', [])]
+        teachers = [Teacher(name=t['name'], subjects=set(t['subjects']), max_sections=t['max_sections'], assigned_count=0) for t in session.get('stored_teachers', [])]
+        periods = [Period(period_id=p['period_id']) for p in session.get('stored_periods', [])]
+        classroom_types = set(session.get('stored_classroom_types', []))
+        class_list = [c['name'] for c in session.get('stored_classes', [])]
+        
+        # Get constraints from session
+        constraints_data = session.get('constraints', [])
+        constraints = [Constraint.from_dict(c) for c in constraints_data]
+        
+        if generate_multiple:
+            top_schedules = run_multiple_schedules_with_constraints(
+                classroom_types, classrooms, class_list, classes, teachers, periods, constraints
+            )
+            last_schedule_result['top_schedules'] = top_schedules
+            last_schedule_result['constraints'] = constraints_data
+            return redirect(url_for('results_multi'))
+        else:
+            output, success = run_scheduler_and_capture_output(
+                classroom_types, classrooms, class_list, classes, teachers, periods
+            )
+            last_schedule_result['output'] = output
+            last_schedule_result['success'] = success
+            last_schedule_result['top_schedules'] = []
+            return redirect(url_for('results'))
+    
+    except Exception as e:
+        flash(f'Error running scheduler: {str(e)}', 'error')
         return redirect(url_for('index'))
 
 

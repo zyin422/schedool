@@ -88,7 +88,6 @@ class SchedulingContext:
     best_teacher_load: Dict[str, int] = field(default_factory=dict)
     best_period_assignments: Dict[str, List[Section]] = field(default_factory=dict)
 
-
 def generate_sections(classes):
     # convert Class objects to Section objects
     sections = []
@@ -336,9 +335,7 @@ def solve_recursive_full(ctx: SchedulingContext, section_index: int = 0) -> bool
     Places each section into a (period, room, teacher) triple or skips it.
     Instrumented to report progress and support early bail-out.
     
-    Key improvement: When a section cannot be placed, SKIP it and continue
-    to the next section rather than backtracking endlessly. This allows
-    the solver to find partial solutions even when constraints are impossible.
+    Skips sections that cannot be placed
     
     Tracks the deepest partial solution for use when no full solution is found.
     """
@@ -402,10 +399,10 @@ def solve_recursive_full(ctx: SchedulingContext, section_index: int = 0) -> bool
 
     # bail-out conditions
     if ctx.search_nodes >= ctx.search_max_nodes:
-        print(f"[search] ABORT: reached node budget ({ctx.search_nodes} >= {ctx.search_max_nodes})")
+        #print(f"[search] ABORT: reached node budget ({ctx.search_nodes} >= {ctx.search_max_nodes})")
         return False
     if (time.time() - ctx.search_start_time) >= ctx.search_max_seconds:
-        print(f"[search] ABORT: reached time budget ({ctx.search_max_seconds}s)")
+        #print(f"[search] ABORT: reached time budget ({ctx.search_max_seconds}s)")
         return False
 
     section = ctx.all_sections[section_index]
