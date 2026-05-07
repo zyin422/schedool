@@ -6,25 +6,31 @@
     <title>School Scheduler - Copilot</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+        :root {
+            --basis-black: #000000;
+            --basis-red: #C41230;
+            --basis-white: #FFFFFF;
+            --basis-gray: #666666;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--basis-gray); min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: var(--basis-white); border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: var(--basis-black); color: var(--basis-white); padding: 30px; text-align: center; border-bottom: 4px solid var(--basis-red); }
         .header h1 { font-size: 2rem; margin-bottom: 10px; }
         .header p { opacity: 0.9; }
         .content { padding: 30px; }
         
         .form-section { margin-bottom: 30px; }
-        .form-section h2 { color: #333; font-size: 1.2rem; margin-bottom: 15px; }
+        .form-section h2 { color: var(--basis-black); font-size: 1.2rem; margin-bottom: 15px; }
         
         .file-input-wrapper { position: relative; margin-bottom: 15px; }
         .file-input-wrapper input[type="file"] { width: 100%; padding: 12px; border: 2px dashed #ddd; border-radius: 8px; cursor: pointer; }
-        .file-input-wrapper input[type="file"]:hover { border-color: #667eea; background: #f8f9ff; }
+        .file-input-wrapper input[type="file"]:hover { border-color: var(--basis-red); background: #fff5f5; }
         .file-input-wrapper label { display: block; font-weight: 500; color: #555; margin-bottom: 5px; }
         
-        .btn { display: inline-block; padding: 14px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102,126,234,0.4); }
-        .btn-outline { background: transparent; border: 2px solid #667eea; color: #667eea; margin-right: 10px; }
-        .btn-outline:hover { background: #667eea; color: white; }
+        .btn { display: inline-block; padding: 14px 30px; background: var(--basis-black); color: var(--basis-white); border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+        .btn:hover { background: var(--basis-red); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(196,18,48,0.4); }
+        .btn-outline { background: transparent; border: 2px solid var(--basis-black); color: var(--basis-black); margin-right: 10px; }
+        .btn-outline:hover { background: var(--basis-black); color: var(--basis-white); }
         .btn-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
         
         .checkbox-wrapper { display: flex; align-items: center; gap: 10px; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
@@ -36,22 +42,22 @@
         .flash.error { background: #fee; color: #c33; border: 1px solid #fcc; }
         .flash.success { background: #efe; color: #3c3; border: 1px solid #cfc; }
         
-        .data-status { background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
-        .data-status h3 { color: #2e7d32; margin-bottom: 10px; font-size: 1rem; }
+        .data-status { background: #f5f5f5; border: 1px solid var(--basis-black); border-left: 4px solid var(--basis-red); border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+        .data-status h3 { color: var(--basis-black); margin-bottom: 10px; font-size: 1rem; }
         .data-status p { color: #555; font-size: 0.9rem; margin-bottom: 5px; }
         
-        .sample-files { background: #f8f9fa; border-radius: 8px; padding: 20px; margin-top: 20px; }
-        .sample-files h3 { color: #333; margin-bottom: 15px; font-size: 1rem; }
+        .sample-files { background: #f8f9fa; border-radius: 8px; padding: 20px; margin-top: 20px; border-left: 4px solid var(--basis-red); }
+        .sample-files h3 { color: var(--basis-black); margin-bottom: 15px; font-size: 1rem; }
         .sample-links { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .sample-links a { display: block; padding: 10px 15px; background: white; border: 1px solid #ddd; border-radius: 6px; text-decoration: none; color: #667eea; font-size: 0.9rem; }
-        .sample-links a:hover { background: #667eea; color: white; border-color: #667eea; }
+        .sample-links a { display: block; padding: 10px 15px; background: white; border: 1px solid #ddd; border-radius: 6px; text-decoration: none; color: var(--basis-black); font-size: 0.9rem; }
+        .sample-links a:hover { background: var(--basis-black); color: white; border-color: var(--basis-black); }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎓 School Scheduler</h1>
-            <p>Upload your CSV files to generate a class schedule</p>
+            <h1>BASIS Independent Silicon Valley</h1>
+            <p>School Scheduler - Upload your CSV files to generate a class schedule</p>
         </div>
         
         <div class="content">
@@ -65,13 +71,13 @@
                 {% endif %}
             {% endwith %}
             
-            {% if session.get('available_teachers') %}
+            {% if session.get('stored_classes') %}
             <div class="data-status">
                 <h3>✅ Data Loaded</h3>
-                <p><strong>Teachers:</strong> {{ session.get('available_teachers', [])|length }} loaded</p>
-                <p><strong>Classrooms:</strong> {{ session.get('available_rooms', [])|length }} loaded</p>
-                <p><strong>Classes:</strong> {{ session.get('available_classes', [])|length }} loaded</p>
-                <p><strong>Periods:</strong> {{ session.get('available_periods', [])|length }} loaded</p>
+                <p><strong>Teachers:</strong> {{ session.get('stored_teachers', [])|length }} loaded</p>
+                <p><strong>Classrooms:</strong> {{ session.get('stored_classrooms', [])|length }} loaded</p>
+                <p><strong>Classes:</strong> {{ session.get('stored_classes', [])|length }} loaded</p>
+                <p><strong>Periods:</strong> {{ session.get('stored_periods', [])|length }} loaded</p>
             </div>
             {% endif %}
             
@@ -102,20 +108,12 @@
                 
                 <div class="btn-group">
                     <button type="submit" name="action" value="upload" class="btn">📤 Upload & Load Data</button>
-                    {% if session.get('available_teachers') %}
-                    <a href="/constraints" class="btn btn-outline">⚙️ Manage Soft Constraints →</a>
-                    {% endif %}
                 </div>
             </form>
             
-            {% if session.get('available_teachers') %}
+            {% if session.get('stored_classes') %}
             <form action="/run_scheduler" method="POST" class="form-section" style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #eee;">
                 <h2>🚀 Run Scheduler</h2>
-                
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="generate_multiple" name="generate_multiple">
-                    <label for="generate_multiple">Generate multiple schedules and rank by score</label>
-                </div>
                 
                 <div class="btn-group">
                     <button type="submit" class="btn">🚀 Run Scheduler</button>
@@ -123,7 +121,7 @@
             </form>
             {% endif %}
             
-            {% if not session.get('available_teachers') %}
+            {% if not session.get('stored_classes') %}
             <div class="sample-files">
                 <h3>📥 Download Sample CSV Files</h3>
                 <div class="sample-links">

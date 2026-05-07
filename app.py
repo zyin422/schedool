@@ -8,11 +8,9 @@ import json
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from scheduler import (
     Classroom, Class, Teacher, Section, Period,
-    run_scheduler, generate_multiple_schedules
+    run_scheduler
 )
 from visualizer import visualize_schedule
-from constraints import Constraint, get_constraint_display_name, get_constraint_parameters_schema
-from scoring import calculate_score, rank_schedules, get_top_n_schedules
 
 app = Flask(__name__)
 app.secret_key = 'schedool-secret-key-change-in-production'
@@ -20,9 +18,7 @@ app.secret_key = 'schedool-secret-key-change-in-production'
 # Store last results in memory
 last_schedule_result = {
     'output': '',
-    'success': False,
-    'top_schedules': [],
-    'constraints': []
+    'success': False
 }
 
 
@@ -110,57 +106,6 @@ def run_scheduler_and_capture_output(classroom_types, classrooms, class_list, cl
     return output, success
 
 
-def run_multiple_schedules_with_constraints(classroom_types, classrooms, class_list, classes, teachers, periods, constraints, num_schedules=50):
-    """Generate multiple schedules, score them, return top 3"""
-    import sys
-    from io import StringIO
-    
-    # Generate multiple schedules
-    schedule_results = generate_multiple_schedules(
-        classroom_types, classrooms, class_list, classes, teachers, periods, num_schedules
-    )
-    
-    scored_schedules = []
-    
-    for schedule_data in schedule_results:
-        # Capture output for this schedule
-        old_stdout = sys.stdout
-        captured_output = StringIO()
-        sys.stdout = captured_output
-        
-        try:
-            visualize_schedule(schedule_data['periods'], schedule_data['sections'], schedule_data['teachers'])
-        finally:
-            sys.stdout = old_stdout
-        
-        output = captured_output.getvalue()
-        
-        # Score the schedule
-        score_result = calculate_score(schedule_data['periods'], schedule_data['sections'], constraints)
-        
-        scored_schedules.append({
-            'seed': schedule_data['seed'],
-            'sections': schedule_data['sections'],
-            'periods': schedule_data['periods'],
-            'teachers': schedule_data['teachers'],
-            'output': output,
-            'score': score_result
-        })
-    
-    # Convert to tuples for ranking (score_result is ScoreResult object with total_score)
-    schedule_tuples = [(s, s['score']) for s in scored_schedules]
-    
-    # Rank and get top 3
-    ranked_tuples = get_top_n_schedules(schedule_tuples, 3)
-    
-    # Convert back to dict format for template
-    top_3 = [s[0] for s in ranked_tuples]
-    
-    return top_3
-    
-    return top_3
-
-
 @app.route('/')
 def index():
     """Main page with upload form"""
@@ -181,8 +126,6 @@ def run_scheduler_web():
     teachers_file = request.files.get('teachers')
     periods_file = request.files.get('periods')
     
-    generate_multiple = request.form.get('generate_multiple') == 'on'
-    
     default_teachers = """name,subjects,max_sections
 Teacher-Math,Math,5
 Teacher-English,English,5
@@ -202,37 +145,17 @@ P5"""
             classes_file.read().decode('utf-8'),
             teachers_file.read().decode('utf-8') if teachers_file and teachers_file.filename else default_teachers,
             periods_file.read().decode('utf-8') if periods_file and periods_file.filename else default_periods
-        )        # Store data for constraint management
-        session["available_teachers"] = [t.name for t in teachers]
-        session["available_rooms"] = [c.name for c in classrooms]
-        session["available_classes"] = [c.name for c in classes]
-        session["available_periods"] = [p.period_id for p in periods]
+        )
         
-        if generate_multiple:
-            # Get constraints from session
-            constraints_data = session.get('constraints', [])
-            constraints = [Constraint.from_dict(c) for c in constraints_data]
-            
-            # Run multiple schedules with scoring
-            top_schedules = run_multiple_schedules_with_constraints(
-                classroom_types, classrooms, class_list, classes, teachers, periods, constraints
-            )
-            
-            last_schedule_result['top_schedules'] = top_schedules
-            last_schedule_result['constraints'] = constraints_data
-            
-            return redirect(url_for('results_multi'))
-        else:
-            # Run single schedule (original behavior)
-            output, success = run_scheduler_and_capture_output(
-                classroom_types, classrooms, class_list, classes, teachers, periods
-            )
-            
-            last_schedule_result['output'] = output
-            last_schedule_result['success'] = success
-            last_schedule_result['top_schedules'] = []
-            
-            return redirect(url_for('results'))
+        # Run single schedule
+        output, success = run_scheduler_and_capture_output(
+            classroom_types, classrooms, class_list, classes, teachers, periods
+        )
+        
+        last_schedule_result['output'] = output
+        last_schedule_result['success'] = success
+        
+        return redirect(url_for('results'))
         
     except Exception as e:
         flash(f'Error running scheduler: {str(e)}', 'error')
@@ -245,79 +168,6 @@ def results():
     return render_template('results.html', 
                           output=last_schedule_result['output'],
                           success=last_schedule_result['success'])
-
-
-@app.route('/results_multi')
-def results_multi():
-    """Display multiple scheduler results with scores"""
-    return render_template('results_multi.html',
-                          top_schedules=last_schedule_result['top_schedules'],
-                          constraints=last_schedule_result['constraints'])
-
-
-@app.route('/constraints', methods=['GET', 'POST'])
-def manage_constraints():
-    """Add and manage soft constraints"""
-    if request.method == 'POST':
-        constraint_type = request.form.get('constraint_type')
-        weight = int(request.form.get('weight', 5))
-        applies_to = request.form.get('applies_to')
-        
-        # Build parameters based on constraint type
-        parameters = {}
-        
-        if constraint_type == 'teacher_morning_pref':
-            parameters['preferred_periods'] = request.form.getlist('preferred_morning')
-        elif constraint_type == 'teacher_afternoon_pref':
-            parameters['preferred_periods'] = request.form.getlist('preferred_afternoon')
-        elif constraint_type == 'room_unavailable':
-            parameters['blocked_period'] = request.form.get('blocked_period')
-        elif constraint_type == 'max_consecutive':
-            parameters['max_consecutive'] = int(request.form.get('max_consecutive', 3))
-        
-        constraint = Constraint(
-            constraint_type=constraint_type,
-            weight=weight,
-            applies_to=applies_to,
-            parameters=parameters
-        )
-        
-        # Add to session
-        constraints = session.get('constraints', [])
-        constraints.append(constraint.to_dict())
-        session['constraints'] = constraints
-        
-        flash(f'Added constraint: {get_constraint_display_name(constraint_type)}', 'success')
-    
-    # Get teachers, rooms, classes for dropdown population
-    teachers = session.get('available_teachers', [])
-    rooms = session.get('available_rooms', [])
-    classes = session.get('available_classes', [])
-    
-    return render_template('constraints.html',
-                          constraints=session.get('constraints', []),
-                          teachers=teachers,
-                          rooms=rooms,
-                          classes=classes)
-
-
-@app.route('/constraints/remove/<constraint_id>')
-def remove_constraint(constraint_id):
-    """Remove a constraint"""
-    constraints = session.get('constraints', [])
-    constraints = [c for c in constraints if c.get('id') != constraint_id]
-    session['constraints'] = constraints
-    
-    flash('Constraint removed', 'success')
-    return redirect(url_for('manage_constraints'))
-
-
-@app.route('/constraints/clear')
-def clear_constraints():
-    """Clear all constraints"""
-    session['constraints'] = []
-    flash('All constraints cleared', 'success')
-    return redirect(url_for('manage_constraints'))
 
 
 @app.route('/set_data', methods=['POST'])
@@ -334,7 +184,7 @@ def set_data_for_constraints():
     session['available_rooms'] = [c.name for c in classrooms]
     session['available_classes'] = [c.name for c in classes]
     
-    return redirect(url_for('manage_constraints'))
+    return redirect(url_for('index'))
 
 
 
@@ -376,7 +226,6 @@ P5"""
         )
         
         # Store data objects in session (serializable versions of scheduler objects)
-        # Store as dicts so they can be reconstructed
         session['stored_classrooms'] = [
             {'name': c.name, 'size': c.size, 'purposes': list(c.purposes)}
             for c in classrooms
@@ -392,37 +241,15 @@ P5"""
         session['stored_periods'] = [{'period_id': p.period_id} for p in periods]
         session['stored_classroom_types'] = list(classroom_types)
         
-        # Debug: print what we're storing
-        print(f"DEBUG UPLOAD: classrooms: {len(classrooms)}, classes: {len(classes)}, teachers: {len(teachers)}, periods: {len(periods)}")
-        print(f"DEBUG UPLOAD: classroom_types: {classroom_types}")
-        
-        # Also store display-friendly data for UI
-        session['available_teachers'] = [t.name for t in teachers]
-        session['available_rooms'] = [c.name for c in classrooms]
-        session['available_classes'] = [c.name for c in classes]
-        session['available_periods'] = [p.period_id for p in periods]
-        
-        flash('Data loaded! You can now manage constraints or run the scheduler.', 'success')
+        flash('Data loaded! You can now run the scheduler.', 'success')
         
         if action == 'run':
-            generate_multiple = request.form.get('generate_multiple') == 'on'
-            constraints_data = session.get('constraints', [])
-            constraints = [Constraint.from_dict(c) for c in constraints_data]
-            
-            if generate_multiple:
-                top_schedules = run_multiple_schedules_with_constraints(
-                    classroom_types, classrooms, class_list, classes, teachers, periods, constraints
-                )
-                last_schedule_result['top_schedules'] = top_schedules
-                last_schedule_result['constraints'] = constraints_data
-                return redirect(url_for('results_multi'))
-            else:
-                output, success = run_scheduler_and_capture_output(
-                    classroom_types, classrooms, class_list, classes, teachers, periods
-                )
-                last_schedule_result['output'] = output
-                last_schedule_result['success'] = success
-                return redirect(url_for('results'))
+            output, success = run_scheduler_and_capture_output(
+                classroom_types, classrooms, class_list, classes, teachers, periods
+            )
+            last_schedule_result['output'] = output
+            last_schedule_result['success'] = success
+            return redirect(url_for('results'))
         
         return redirect(url_for('index'))
         
@@ -441,8 +268,6 @@ def run_scheduler_stored():
         flash('No data stored. Please upload CSV files first.', 'error')
         return redirect(url_for('index'))
     
-    generate_multiple = request.form.get('generate_multiple') == 'on'
-    
     try:
         # Reconstruct scheduler objects from stored data
         classrooms = [Classroom(name=c['name'], size=c['size'], purposes=set(c['purposes'])) for c in session.get('stored_classrooms', [])]
@@ -452,33 +277,12 @@ def run_scheduler_stored():
         classroom_types = set(session.get('stored_classroom_types', []))
         class_list = [c['name'] for c in session.get('stored_classes', [])]
         
-        # Debug: print stored data
-        print(f"DEBUG: classrooms: {len(classrooms)}, classes: {len(classes)}, teachers: {len(teachers)}, periods: {len(periods)}")
-        print(f"DEBUG: classroom_types: {classroom_types}")
-        print(f"DEBUG: class_list: {class_list}")
-        print(f"DEBUG: generate_multiple: {generate_multiple}")
-        
-        # Get constraints from session
-        constraints_data = session.get('constraints', [])
-        constraints = [Constraint.from_dict(c) for c in constraints_data]
-        print(f"DEBUG: constraints: {len(constraints)}")
-        
-        if generate_multiple:
-            print("DEBUG: About to call run_multiple_schedules_with_constraints")
-            top_schedules = run_multiple_schedules_with_constraints(
-                classroom_types, classrooms, class_list, classes, teachers, periods, constraints
-            )
-            last_schedule_result['top_schedules'] = top_schedules
-            last_schedule_result['constraints'] = constraints_data
-            return redirect(url_for('results_multi'))
-        else:
-            output, success = run_scheduler_and_capture_output(
-                classroom_types, classrooms, class_list, classes, teachers, periods
-            )
-            last_schedule_result['output'] = output
-            last_schedule_result['success'] = success
-            last_schedule_result['top_schedules'] = []
-            return redirect(url_for('results'))
+        output, success = run_scheduler_and_capture_output(
+            classroom_types, classrooms, class_list, classes, teachers, periods
+        )
+        last_schedule_result['output'] = output
+        last_schedule_result['success'] = success
+        return redirect(url_for('results'))
     
     except Exception as e:
         import traceback

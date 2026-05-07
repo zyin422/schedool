@@ -6,4 +6,7 @@ Generative AI (Claude AI, ChatGPT) was used in this project to brainstorm ideas,
 
 To-do:
 
-- Create hard constraints
+- Implement teacher -> section assignment w/o room/time
+- Implement 3-day classes
+- Fixed electives, teachers, sections
+- teacher teaches predetermined section but unsure of time
