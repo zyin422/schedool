@@ -215,6 +215,38 @@
                 </p>
             </div>
             
+            {% if priority_order %}
+            <div class="output-container">
+                <div class="output-header">
+                    <h2>📊 Solver Section Priority Order</h2>
+                </div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                    <thead>
+                        <tr style="background: #1e1e1e; color: #d4d4d4;">
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #333;">Priority</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #333;">Section</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #333;">Class</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #333;"># Teachers</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #333;"># Rooms</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #333;">Pre-assigned</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in priority_order %}
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 8px;">{{ item.priority }}</td>
+                            <td style="padding: 8px; font-family: monospace;">{{ item.section_id }}</td>
+                            <td style="padding: 8px;">{{ item.class_name }}</td>
+                            <td style="padding: 8px;">{{ item.num_teachers }}</td>
+                            <td style="padding: 8px;">{{ item.num_rooms }}</td>
+                            <td style="padding: 8px;">{{ item.preassigned }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+            
             <div class="output-container">
                 <div class="output-header">
                     <h2>📋 Full Schedule Output</h2>

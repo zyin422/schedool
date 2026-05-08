@@ -38,6 +38,9 @@ class Section:
     required_classroom_type: str
     assigned_teacher: Optional[Teacher] = None
     assigned_classroom: Optional[Classroom] = None
+    preassigned_teacher: Optional[Teacher] = None
+    preassigned_classroom: Optional[Classroom] = None
+    order: int = 0
     
     def is_fully_assigned(self) -> bool:
         return all([self.assigned_teacher, self.assigned_classroom])
@@ -91,13 +94,16 @@ class SchedulingContext:
 def generate_sections(classes):
     # convert Class objects to Section objects
     sections = []
+    order = 0
     for cls in classes:
         for section_id in cls.get_sections():
             sections.append(Section(
                 section_id=section_id,
                 class_name=cls.name,
-                required_classroom_type=cls.required_classroom_type
+                required_classroom_type=cls.required_classroom_type,
+                order=order
             ))
+            order += 1
     return sections
 
 
@@ -112,13 +118,42 @@ def build_scheduling_context(sections, teachers, classrooms, periods) -> Schedul
 
     # 2. Build Domains (precompute valid teachers/rooms per section)
     for section in sections:
-        ctx.valid_teachers[section.section_id] = [
+        # Start with all qualified teachers
+        qualified_teachers = [
             t for t in teachers if section.class_name in t.subjects and t.max_sections > 0
         ]
+        
+        # If teacher is pre-assigned, restrict to only that teacher
+        if section.preassigned_teacher is not None:
+            # Verify the pre-assigned teacher is qualified
+            if section.preassigned_teacher in qualified_teachers:
+                ctx.valid_teachers[section.section_id] = [section.preassigned_teacher]
+            else:
+                raise ValueError(
+                    f"CRITICAL: Section {section.section_id} has pre-assigned teacher "
+                    f"{section.preassigned_teacher.name} who is not qualified to teach {section.class_name}."
+                )
+        else:
+            ctx.valid_teachers[section.section_id] = qualified_teachers
 
-        ctx.valid_rooms[section.section_id] = [
+        # Start with all compatible rooms
+        compatible_rooms = [
             r for r in classrooms if section.required_classroom_type in r.purposes
         ]
+        
+        # If classroom is pre-assigned, restrict to only that classroom
+        if section.preassigned_classroom is not None:
+            # Verify the pre-assigned classroom is compatible
+            if section.preassigned_classroom in compatible_rooms:
+                ctx.valid_rooms[section.section_id] = [section.preassigned_classroom]
+            else:
+                raise ValueError(
+                    f"CRITICAL: Section {section.section_id} has pre-assigned classroom "
+                    f"{section.preassigned_classroom.name} which is not compatible with "
+                    f"required type {section.required_classroom_type}."
+                )
+        else:
+            ctx.valid_rooms[section.section_id] = compatible_rooms
 
         # Fail fast if impossible
         if not ctx.valid_teachers[section.section_id]:
@@ -127,9 +162,24 @@ def build_scheduling_context(sections, teachers, classrooms, periods) -> Schedul
             raise ValueError(f"CRITICAL: Section {section.section_id} has NO compatible rooms.")
 
     # 3. Initialize state matrices (scoreboard)
+    # Count pre-assigned sections per teacher to reserve capacity
+    preassigned_teacher_count = {t.name: 0 for t in teachers}
+    for section in sections:
+        if section.preassigned_teacher is not None:
+            preassigned_teacher_count[section.preassigned_teacher.name] += 1
+    
+    # Validate that pre-assigned counts don't exceed teacher capacity
+    for t in teachers:
+        if preassigned_teacher_count[t.name] > t.max_sections:
+            raise ValueError(
+                f"CRITICAL: Teacher {t.name} has {preassigned_teacher_count[t.name]} pre-assigned sections "
+                f"but max_sections is {t.max_sections}."
+            )
+    
     for t in teachers:
         ctx.teacher_schedule[t.name] = {p.period_id: None for p in periods}
-        ctx.teacher_load[t.name] = 0
+        # Initialize teacher load with count of pre-assigned sections (they are committed)
+        ctx.teacher_load[t.name] = preassigned_teacher_count[t.name]
 
     for r in classrooms:
         ctx.room_schedule[r.name] = {p.period_id: None for p in periods}
@@ -145,16 +195,46 @@ def build_scheduling_context(sections, teachers, classrooms, periods) -> Schedul
 def prioritize_sections(ctx: SchedulingContext):
     """
     Phase 2: sort ctx.all_sections in-place by difficulty:
-      1) fewest qualified teachers (primary)
-      2) fewest compatible rooms (secondary)
+      1) fewest qualified teachers (weighted 2x - most critical constraint)
+      2) fewest compatible rooms (weighted 1x - secondary constraint)
+    Returns the priority ordering as a list of dicts for display.
     """
     def difficulty(section: Section):
         num_teachers = len(ctx.valid_teachers.get(section.section_id, []))
         num_rooms = len(ctx.valid_rooms.get(section.section_id, []))
-        return (num_teachers, num_rooms)
+        # Weight teacher scarcity 2x as heavily as room scarcity
+        return (num_teachers * 2 + num_rooms, num_teachers, num_rooms)
 
     ctx.all_sections.sort(key=difficulty)
     print("✅ Phase 2: Sections sorted by difficulty (most constrained first).")
+    print("\n📊 SOLVER SECTION PRIORITY ORDER:")
+    print("-" * 80)
+    print(f"  {'Priority':<10} {'Section':<20} {'Class':<15} {'#Teachers':<10} {'#Rooms':<10} {'Pre-assigned'}")
+    print("-" * 80)
+    priority_order = []
+    for i, section in enumerate(ctx.all_sections):
+        num_t = len(ctx.valid_teachers.get(section.section_id, []))
+        num_r = len(ctx.valid_rooms.get(section.section_id, []))
+        pre = ""
+        if section.preassigned_teacher:
+            pre += f"T:{section.preassigned_teacher.name}"
+        if section.preassigned_classroom:
+            if pre:
+                pre += ", "
+            pre += f"R:{section.preassigned_classroom.name}"
+        if not pre:
+            pre = "-"
+        print(f"  {i+1:<10} {section.section_id:<20} {section.class_name:<15} {num_t:<10} {num_r:<10} {pre}")
+        priority_order.append({
+            'priority': i + 1,
+            'section_id': section.section_id,
+            'class_name': section.class_name,
+            'num_teachers': num_t,
+            'num_rooms': num_r,
+            'preassigned': pre
+        })
+    print("-" * 80)
+    return priority_order
 
 def forward_check(ctx: SchedulingContext, section_index: int, period_id: str, room, teacher) -> bool:
     """
@@ -327,10 +407,12 @@ def solve_recursive_full(ctx: SchedulingContext, section_index: int = 0) -> bool
 
             # Try every qualified teacher (human resource)
             for teacher in ctx.valid_teachers.get(section.section_id, []):
-                # teacher must be free in this period and below max load
+                # teacher must be free in this period
                 if ctx.teacher_schedule[teacher.name][p_id] is not None:
                     continue
-                if ctx.teacher_load[teacher.name] >= teacher.max_sections:
+                # Capacity check: skip if section is NOT pre-assigned and teacher is at max
+                # (pre-assigned sections already count toward load from the start)
+                if section.preassigned_teacher is None and ctx.teacher_load[teacher.name] >= teacher.max_sections:
                     continue
 
                 # --- CHOOSE ---
@@ -343,7 +425,10 @@ def solve_recursive_full(ctx: SchedulingContext, section_index: int = 0) -> bool
 
                 ctx.room_schedule[room.name][p_id] = section
                 ctx.teacher_schedule[teacher.name][p_id] = section
-                ctx.teacher_load[teacher.name] += 1
+                # Only increment teacher load if this section is NOT pre-assigned
+                # (pre-assigned sections already counted in initial load)
+                if section.preassigned_teacher is None:
+                    ctx.teacher_load[teacher.name] += 1
 
                 section_placed = True
 
@@ -352,7 +437,9 @@ def solve_recursive_full(ctx: SchedulingContext, section_index: int = 0) -> bool
                     return True
 
                 # --- BACKTRACK ---
-                ctx.teacher_load[teacher.name] -= 1
+                # Only decrement teacher load if this section was NOT pre-assigned
+                if section.preassigned_teacher is None:
+                    ctx.teacher_load[teacher.name] -= 1
                 ctx.teacher_schedule[teacher.name][p_id] = None
                 ctx.room_schedule[room.name][p_id] = None
 
@@ -391,13 +478,18 @@ def solve_recursive_full(ctx: SchedulingContext, section_index: int = 0) -> bool
     return False
 
 
-def run_scheduler(classroom_types, classrooms, class_list, classes, teachers, periods):
+def run_scheduler(classroom_types, classrooms, class_list, classes, teachers, periods, preassigned_sections=None, priority_order=None):
     # main scheduling algorithm - Phase 1 & 2 remain (flatten + context + prioritize)
-    sections = generate_sections(classes)
+    if preassigned_sections is not None:
+        sections = preassigned_sections
+    else:
+        sections = generate_sections(classes)
 
     ctx = build_scheduling_context(sections, teachers, classrooms, periods)
 
-    prioritize_sections(ctx)
+    computed_order = prioritize_sections(ctx)
+    if priority_order is not None:
+        priority_order.extend(computed_order)
 
     # === DIAGNOSTIC: Analyze section_index=18 before search begins ===
     # Uncomment the following line to run diagnostics:

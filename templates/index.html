@@ -107,19 +107,82 @@
                 </div>
                 
                 <div class="btn-group">
-                    <button type="submit" name="action" value="upload" class="btn">📤 Upload & Load Data</button>
-                </div>
-            </form>
-            
-            {% if session.get('stored_classes') %}
-            <form action="/run_scheduler" method="POST" class="form-section" style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #eee;">
-                <h2>🚀 Run Scheduler</h2>
-                
-                <div class="btn-group">
-                    <button type="submit" class="btn">🚀 Run Scheduler</button>
-                </div>
-            </form>
-            {% endif %}
+                   <button type="submit" name="action" value="upload" class="btn">📤 Upload & Load Data</button>
+               </div>
+           </form>
+           
+           {% if session.get('stored_classes') %}
+           <form action="/set_preassignments" method="POST" class="form-section" style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #eee;">
+               <h2>📌 Pre-assign Sections</h2>
+               <p style="color: #666; margin-bottom: 15px;">Set teacher or classroom pre-assignments for specific sections. The scheduler will respect these assignments.</p>
+               
+               <div id="preassignments-container">
+                   <div class="preassignment-row" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: end;">
+                       <div style="flex: 3;">
+                           <label style="display: block; font-weight: 500; color: #555; margin-bottom: 5px;">Section</label>
+                           <select name="sections" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                               <option value="">Select a section...</option>
+                               {% for class in session.get('stored_classes', []) %}
+                                   {% for i in range(1, class.num_sections + 1) %}
+                                       <option value="{{ class.name }}-{{ i }}">{{ class.name }}-{{ i }}</option>
+                                   {% endfor %}
+                               {% endfor %}
+                           </select>
+                       </div>
+                       <div style="flex: 2;">
+                           <label style="display: block; font-weight: 500; color: #555; margin-bottom: 5px;">Teacher (optional)</label>
+                           <select name="teachers" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                               <option value="">-- No pre-assignment --</option>
+                               {% for teacher in session.get('stored_teachers', []) %}
+                                   <option value="{{ teacher.name }}">{{ teacher.name }}</option>
+                               {% endfor %}
+                           </select>
+                       </div>
+                       <div style="flex: 2;">
+                           <label style="display: block; font-weight: 500; color: #555; margin-bottom: 5px;">Classroom (optional)</label>
+                           <select name="classrooms" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                               <option value="">-- No pre-assignment --</option>
+                               {% for room in session.get('stored_classrooms', []) %}
+                                   <option value="{{ room.name }}">{{ room.name }}</option>
+                               {% endfor %}
+                           </select>
+                       </div>
+                       <div style="flex: 1; display: flex; align-items: flex-end;">
+                           <button type="button" class="btn btn-outline" onclick="removePreassignmentRow(this)" style="padding: 8px 12px; font-size: 0.9rem;">Remove</button>
+                       </div>
+                   </div>
+               </div>
+               
+               <div class="btn-group" style="margin-top: 15px;">
+                   <button type="button" class="btn btn-outline" onclick="addPreassignmentRow()" style="padding: 10px 20px;">+ Add Another Pre-assignment</button>
+                   <button type="button" class="btn btn-outline" onclick="clearAllPreassignments()" style="padding: 10px 20px; border-color: #c41230; color: #c41230;">🗑️ Clear All</button>
+                   <button type="submit" class="btn">💾 Save Pre-assignments</button>
+               </div>
+               
+               {% if session.get('preassignments') %}
+               <div style="margin-top: 15px; padding: 15px; background: #e8f5e9; border: 1px solid #4caf50; border-radius: 6px;">
+                   <strong style="color: #2e7d32;">Current pre-assignments:</strong>
+                   <ul style="margin-top: 5px; margin-bottom: 0;">
+                       {% for pa in session.get('preassignments', []) %}
+                           <li style="color: #2e7d32;">{{ pa.section }}:
+                               {% if pa.teacher %}Teacher: {{ pa.teacher }}{% endif %}
+                               {% if pa.classroom %}Classroom: {{ pa.classroom }}{% endif %}
+                               {% if not pa.teacher and not pa.classroom %}<em>No pre-assignment</em>{% endif %}
+                           </li>
+                       {% endfor %}
+                   </ul>
+               </div>
+               {% endif %}
+           </form>
+           
+           <form action="/run_scheduler" method="POST" class="form-section" style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #eee;">
+               <h2>🚀 Run Scheduler</h2>
+               
+               <div class="btn-group">
+                   <button type="submit" class="btn">🚀 Run Scheduler</button>
+               </div>
+           </form>
+           {% endif %}
             
             {% if not session.get('stored_classes') %}
             <div class="sample-files">
@@ -134,5 +197,64 @@
             {% endif %}
         </div>
     </div>
+    
+    <script>
+        function addPreassignmentRow() {
+            const container = document.getElementById('preassignments-container');
+            const row = document.createElement('div');
+            row.className = 'preassignment-row';
+            row.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: end;';
+            row.innerHTML = `
+                <div style="flex: 3;">
+                    <label style="display: block; font-weight: 500; color: #555; margin-bottom: 5px;">Section</label>
+                    <select name="sections" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="">Select a section...</option>
+                        {% for class in session.get('stored_classes', []) %}
+                            {% for i in range(1, class.num_sections + 1) %}
+                                <option value="{{ class.name }}-{{ i }}">{{ class.name }}-{{ i }}</option>
+                            {% endfor %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="flex: 2;">
+                    <label style="display: block; font-weight: 500; color: #555; margin-bottom: 5px;">Teacher (optional)</label>
+                    <select name="teachers" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="">-- No pre-assignment --</option>
+                        {% for teacher in session.get('stored_teachers', []) %}
+                            <option value="{{ teacher.name }}">{{ teacher.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="flex: 2;">
+                    <label style="display: block; font-weight: 500; color: #555; margin-bottom: 5px;">Classroom (optional)</label>
+                    <select name="classrooms" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="">-- No pre-assignment --</option>
+                        {% for room in session.get('stored_classrooms', []) %}
+                            <option value="{{ room.name }}">{{ room.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="flex: 1; display: flex; align-items: flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="removePreassignmentRow(this)" style="padding: 8px 12px; font-size: 0.9rem;">Remove</button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+        
+        function removePreassignmentRow(button) {
+            const container = document.getElementById('preassignments-container');
+            const rows = container.querySelectorAll('.preassignment-row');
+            if (rows.length > 1) {
+                button.closest('.preassignment-row').remove();
+            }
+        }
+        
+        function clearAllPreassignments() {
+            if (confirm('Are you sure you want to clear all pre-assignments?')) {
+                fetch('/clear_preassignments', { method: 'POST' })
+                    .then(response => window.location.reload());
+            }
+        }
+    </script>
 </body>
 </html>

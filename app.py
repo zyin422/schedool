@@ -18,7 +18,8 @@ app.secret_key = 'schedool-secret-key-change-in-production'
 # Store last results in memory
 last_schedule_result = {
     'output': '',
-    'success': False
+    'success': False,
+    'priority_order': []
 }
 
 
@@ -84,26 +85,27 @@ def load_data_from_csv(classrooms_csv, classes_csv, teachers_csv, periods_csv):
     return classroom_types, classrooms, class_list, classes, teachers, periods
 
 
-def run_scheduler_and_capture_output(classroom_types, classrooms, class_list, classes, teachers, periods):
+def run_scheduler_and_capture_output(classroom_types, classrooms, class_list, classes, teachers, periods, sections=None):
     """Run the scheduler and capture the output"""
     import sys
     from io import StringIO
-    
+
     old_stdout = sys.stdout
     captured_output = StringIO()
     sys.stdout = captured_output
-    
+
+    priority_order = []
     try:
-        sections = run_scheduler(classroom_types, classrooms, class_list, classes, teachers, periods)
+        run_scheduler(classroom_types, classrooms, class_list, classes, teachers, periods, sections, priority_order)
         visualize_schedule(periods, sections, teachers)
     finally:
         sys.stdout = old_stdout
-    
+
     output = captured_output.getvalue()
     fully_assigned = sum(1 for s in sections if s.is_fully_assigned())
     success = fully_assigned == len(sections)
-    
-    return output, success
+
+    return output, success, priority_order
 
 
 @app.route('/')
@@ -149,7 +151,7 @@ P5"""
         
         # Run single schedule
         output, success = run_scheduler_and_capture_output(
-            classroom_types, classrooms, class_list, classes, teachers, periods
+            classroom_types, classrooms, class_list, classes, teachers, periods, sections
         )
         
         last_schedule_result['output'] = output
@@ -183,6 +185,52 @@ def set_data_for_constraints():
     session['available_teachers'] = [t.name for t in teachers]
     session['available_rooms'] = [c.name for c in classrooms]
     session['available_classes'] = [c.name for c in classes]
+    return redirect(url_for('index'))
+
+
+@app.route('/clear_preassignments', methods=['POST'])
+def clear_preassignments():
+    """Clear all pre-assignments"""
+    session['preassignments'] = []
+    flash('All pre-assignments cleared', 'success')
+    return redirect(url_for('index'))
+
+
+
+@app.route('/set_preassignments', methods=['POST'])
+def set_preassignments():
+    """Store pre-assignments for sections"""
+    try:
+        # Get form data
+        section_ids = request.form.getlist('sections')
+        teacher_names = request.form.getlist('teachers')
+        classroom_names = request.form.getlist('classrooms')
+        
+        # Validate
+        if not section_ids:
+            flash('Please select at least one section for pre-assignment.', 'error')
+            return redirect(url_for('index'))
+        
+        # Build pre-assignments list
+        preassignments = []
+        for i, section_id in enumerate(section_ids):
+            teacher_name = teacher_names[i] if i < len(teacher_names) and teacher_names[i] else None
+            classroom_name = classroom_names[i] if i < len(classroom_names) and classroom_names[i] else None
+            
+            # Only add if there's at least one pre-assignment
+            if teacher_name or classroom_name:
+                preassignments.append({
+                    'section': section_id,
+                    'teacher': teacher_name,
+                    'classroom': classroom_name
+                })
+        
+        # Store in session
+        session['preassignments'] = preassignments
+        flash(f'Saved {len(preassignments)} pre-assignment(s)!', 'success')
+        
+    except Exception as e:
+        flash(f'Error saving pre-assignments: {str(e)}', 'error')
     
     return redirect(url_for('index'))
 
@@ -244,11 +292,12 @@ P5"""
         flash('Data loaded! You can now run the scheduler.', 'success')
         
         if action == 'run':
-            output, success = run_scheduler_and_capture_output(
-                classroom_types, classrooms, class_list, classes, teachers, periods
+            output, success, priority_order = run_scheduler_and_capture_output(
+                classroom_types, classrooms, class_list, classes, teachers, periods, sections
             )
             last_schedule_result['output'] = output
             last_schedule_result['success'] = success
+            last_schedule_result['priority_order'] = priority_order
             return redirect(url_for('results'))
         
         return redirect(url_for('index'))
@@ -277,11 +326,48 @@ def run_scheduler_stored():
         classroom_types = set(session.get('stored_classroom_types', []))
         class_list = [c['name'] for c in session.get('stored_classes', [])]
         
-        output, success = run_scheduler_and_capture_output(
-            classroom_types, classrooms, class_list, classes, teachers, periods
+        # Get pre-assignments from session
+        preassignments = session.get('preassignments', [])
+        
+        # Create lookup dictionaries for teachers and classrooms
+        teacher_dict = {t.name: t for t in teachers}
+        classroom_dict = {c.name: c for c in classrooms}
+        
+        # Generate sections with pre-assignments
+        sections = []
+        order = 0
+        for cls in classes:
+            for i in range(cls.num_sections):
+                section_id = f"{cls.name}-{i+1}"
+
+                # Check if this section has pre-assignments
+                preassigned_teacher = None
+                preassigned_classroom = None
+
+                for pa in preassignments:
+                    if pa['section'] == section_id:
+                        if pa['teacher'] and pa['teacher'] in teacher_dict:
+                            preassigned_teacher = teacher_dict[pa['teacher']]
+                        if pa['classroom'] and pa['classroom'] in classroom_dict:
+                            preassigned_classroom = classroom_dict[pa['classroom']]
+                        break
+
+                sections.append(Section(
+                    section_id=section_id,
+                    class_name=cls.name,
+                    required_classroom_type=cls.required_classroom_type,
+                    preassigned_teacher=preassigned_teacher,
+                    preassigned_classroom=preassigned_classroom,
+                    order=order
+                ))
+                order += 1
+        
+        output, success, priority_order = run_scheduler_and_capture_output(
+            classroom_types, classrooms, class_list, classes, teachers, periods, sections
         )
         last_schedule_result['output'] = output
         last_schedule_result['success'] = success
+        last_schedule_result['priority_order'] = priority_order
         return redirect(url_for('results'))
     
     except Exception as e:
