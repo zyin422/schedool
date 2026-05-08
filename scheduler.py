@@ -40,8 +40,9 @@ class Section:
     assigned_classroom: Optional[Classroom] = None
     preassigned_teacher: Optional[Teacher] = None
     preassigned_classroom: Optional[Classroom] = None
+    preassigned_periods: Optional[List[str]] = None  # None means all periods allowed
     order: int = 0
-    
+
     def is_fully_assigned(self) -> bool:
         return all([self.assigned_teacher, self.assigned_classroom])
 
@@ -101,6 +102,7 @@ def generate_sections(classes):
                 section_id=section_id,
                 class_name=cls.name,
                 required_classroom_type=cls.required_classroom_type,
+                preassigned_periods=None,
                 order=order
             ))
             order += 1
@@ -160,6 +162,20 @@ def build_scheduling_context(sections, teachers, classrooms, periods) -> Schedul
             raise ValueError(f"CRITICAL: Section {section.section_id} has NO qualified teachers.")
         if not ctx.valid_rooms[section.section_id]:
             raise ValueError(f"CRITICAL: Section {section.section_id} has NO compatible rooms.")
+
+        # Validate pre-assigned periods if specified
+        if section.preassigned_periods is not None:
+            valid_period_ids = {p.period_id for p in periods}
+            invalid = set(section.preassigned_periods) - valid_period_ids
+            if invalid:
+                raise ValueError(
+                    f"CRITICAL: Section {section.section_id} has pre-assigned periods "
+                    f"{invalid} which do not exist. Valid periods: {valid_period_ids}"
+                )
+            if not section.preassigned_periods:
+                raise ValueError(
+                    f"CRITICAL: Section {section.section_id} has an empty pre-assigned periods list."
+                )
 
     # 3. Initialize state matrices (scoreboard)
     # Count pre-assigned sections per teacher to reserve capacity
@@ -398,6 +414,10 @@ def solve_recursive_full(ctx: SchedulingContext, section_index: int = 0) -> bool
     section_placed = False
     for period in ctx.periods:
         p_id = period.period_id
+
+        # Skip periods that are not in the pre-assigned list (if specified)
+        if section.preassigned_periods is not None and p_id not in section.preassigned_periods:
+            continue
 
         # Try every compatible room (space) for this section
         for room in ctx.valid_rooms.get(section.section_id, []):

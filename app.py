@@ -205,26 +205,32 @@ def set_preassignments():
         section_ids = request.form.getlist('sections')
         teacher_names = request.form.getlist('teachers')
         classroom_names = request.form.getlist('classrooms')
-        
+        period_selections = request.form.getlist('periods')
+
         # Validate
         if not section_ids:
             flash('Please select at least one section for pre-assignment.', 'error')
             return redirect(url_for('index'))
-        
+
         # Build pre-assignments list
         preassignments = []
         for i, section_id in enumerate(section_ids):
             teacher_name = teacher_names[i] if i < len(teacher_names) and teacher_names[i] else None
             classroom_name = classroom_names[i] if i < len(classroom_names) and classroom_names[i] else None
-            
+            period_str = period_selections[i] if i < len(period_selections) and period_selections[i] else ''
+
+            # Parse period selection: comma-separated list, or empty for all
+            selected_periods = [p.strip() for p in period_str.split(',') if p.strip()] if period_str else None
+
             # Only add if there's at least one pre-assignment
-            if teacher_name or classroom_name:
+            if teacher_name or classroom_name or selected_periods:
                 preassignments.append({
                     'section': section_id,
                     'teacher': teacher_name,
-                    'classroom': classroom_name
+                    'classroom': classroom_name,
+                    'periods': selected_periods
                 })
-        
+
         # Store in session
         session['preassignments'] = preassignments
         flash(f'Saved {len(preassignments)} pre-assignment(s)!', 'success')
@@ -343,6 +349,7 @@ def run_scheduler_stored():
                 # Check if this section has pre-assignments
                 preassigned_teacher = None
                 preassigned_classroom = None
+                preassigned_periods = None
 
                 for pa in preassignments:
                     if pa['section'] == section_id:
@@ -350,6 +357,8 @@ def run_scheduler_stored():
                             preassigned_teacher = teacher_dict[pa['teacher']]
                         if pa['classroom'] and pa['classroom'] in classroom_dict:
                             preassigned_classroom = classroom_dict[pa['classroom']]
+                        if pa.get('periods'):
+                            preassigned_periods = pa['periods']
                         break
 
                 sections.append(Section(
@@ -358,6 +367,7 @@ def run_scheduler_stored():
                     required_classroom_type=cls.required_classroom_type,
                     preassigned_teacher=preassigned_teacher,
                     preassigned_classroom=preassigned_classroom,
+                    preassigned_periods=preassigned_periods,
                     order=order
                 ))
                 order += 1

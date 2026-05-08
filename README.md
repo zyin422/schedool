@@ -5,8 +5,9 @@ This is a scheduling algorithm designed to create schedule assignments for BASIS
 Generative AI (Claude AI, ChatGPT) was used in this project to brainstorm ideas, create testing datasets, making data visualizations
 
 To-do:
-
-- Implement teacher -> section assignment w/o room/time
 - Implement 3-day classes
 - Fixed electives, teachers, sections
 - teacher teaches predetermined section but unsure of time
+
+Done:
+- Implement teacher -> section assignment w/o room/time

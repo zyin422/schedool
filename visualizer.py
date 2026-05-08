@@ -2,29 +2,31 @@ def show_schedule_by_period(periods, teachers):
     print("\n" + "="*100)
     print("SCHEDULE BY PERIOD".center(100))
     print("="*100)
-    
+
     for p in periods:
         print(f"\n{p.period_id}")
         print("-" * 100)
-        
+
         for section in p.assigned_sections:
             classroom = section.assigned_classroom.name if section.assigned_classroom else "⚠️ NO ROOM"
-            
+
             # Build pre-assignment indicator
             pre_indicators = []
             if section.preassigned_teacher:
                 pre_indicators.append(f"pre-T:{section.preassigned_teacher.name}")
             if section.preassigned_classroom:
                 pre_indicators.append(f"pre-R:{section.preassigned_classroom.name}")
+            if section.preassigned_periods is not None:
+                pre_indicators.append(f"pre-P:{','.join(section.preassigned_periods)}")
             pre_str = f" [{' | '.join(pre_indicators)}]" if pre_indicators else ""
-            
+
             if section.assigned_teacher:
                 teacher_name = section.assigned_teacher.name
                 print(f"  {classroom:<15} │ {section.section_id:<20} │ {teacher_name}{pre_str}")
             else:
                 # Find qualified teachers for this section
                 qualified_teachers = [t for t in teachers if section.class_name in t.subjects]
-                
+
                 print(f"  {classroom:<15} │ {section.section_id:<20} │ ⚠️ NO TEACHER{pre_str}")
                 if qualified_teachers:
                     print(f"      ↳ {len(qualified_teachers)} qualified teacher(s):")
@@ -58,6 +60,8 @@ def show_schedule_by_classroom(periods, sections):
                     pre_indicators.append(f"pre-T:{section.preassigned_teacher.name}")
                 if section.preassigned_classroom:
                     pre_indicators.append(f"pre-R:{section.preassigned_classroom.name}")
+                if section.preassigned_periods is not None:
+                    pre_indicators.append(f"pre-P:{','.join(section.preassigned_periods)}")
                 pre_str = f" [{' | '.join(pre_indicators)}]" if pre_indicators else ""
                 print(f"  {p.period_id:<12} │ {section.section_id:<20} │ {teacher}{pre_str}")
             else:
@@ -120,7 +124,7 @@ def show_summary(sections):
     print(f"  📌 Pre-assigned: {preassigned_count}/{total_sections}")
     
     # Show pre-assigned sections
-    preassigned = [s for s in sections if s.preassigned_teacher or s.preassigned_classroom]
+    preassigned = [s for s in sections if s.preassigned_teacher or s.preassigned_classroom or (s.preassigned_periods is not None)]
     if preassigned:
         print("\n📌 PRE-ASSIGNED SECTIONS:")
         print("-" * 100)
@@ -130,6 +134,8 @@ def show_summary(sections):
                 parts.append(f"Teacher: {s.preassigned_teacher.name}")
             if s.preassigned_classroom:
                 parts.append(f"Classroom: {s.preassigned_classroom.name}")
+            if s.preassigned_periods is not None:
+                parts.append(f"Periods: {', '.join(s.preassigned_periods)}")
             print(f"  - {s.section_id:<20} ({', '.join(parts)})")
     
     unassigned = [s for s in sections if not s.is_fully_assigned()]
